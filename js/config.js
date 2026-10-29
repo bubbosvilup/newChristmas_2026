@@ -4,11 +4,8 @@ window.CONFIG = {
   names: ["Nicco", "Giulia", "Marco", "Sara", "Luca", "Elena"],
 
   // Info sullo scambio dei regali (mostrate nella scheda del Pokédex)
-  eventDate: "25/12/2026",
-  budget: "30€",
-
-  // Sprite dei Pokémon (PokéAPI, immagini pubbliche)
-  spriteBase: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/",
+  eventDate: "da definire",
+  budget: "30€ indicativi",
 
   // Quante Safari Ball hai (puro folklore, la cattura riesce sempre entro 3 lanci)
   safariBalls: 30,

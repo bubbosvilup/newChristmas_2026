@@ -1,27 +1,27 @@
 // GENERATO da tools/build-secrets.mjs — accoppiamenti cifrati (AES-GCM, chiave da nome+PIN).
 window.SECRETS = {
   "nicco": {
-    "iv": "nVyGw/zwytIJM+Dd",
-    "ct": "ds+vpe9sujEnsCRnq7c84PrK5bQKvwsV+Q/zh4M/GeL50Ytn2g23M90RX9cUdXS0kUnXI0d/v+Dfg0seQTqBBprlDUpnCw329j84wV5Zx3YRXGLBhrY0s29skMTjEGU1i0vhL1LxHCTwOpMZxTBBD0Uzi7VjWVx2lLhWuxGvNS9Qf3Jwq3OgsVPU9c1OWKj/0s2aaB6X34SQRLfAPhuYtKI="
+    "iv": "muDSTZRwWcJZTGQ4",
+    "ct": "LKMG1tosouNdi1vwx1PS4zvrLNrqbh553nOAPmnizsQPPbFnpbJxK+NGqSTNVl5Pj/dfq+ke3JfOzFWMRzD0m8OCAeFg1U8swKYM4CR5oV9n4XkYcdXlh4N6b1XX6lCuxS0TDRkXh/I7gbTYiX+TqucqENbgoOA0shuQ3FTtLkOBsBtp4D2WGe4eUJLTuUUx/VcaBhGC5h/qg+9QgOHlHzCMhmA2i0y/XruCzg=="
   },
   "giulia": {
-    "iv": "+Y1rE81V2mFBlVyQ",
-    "ct": "elAjglbbyEDRLTEnh96wRCzIf4nLhIo2voPuKXnfVF+97CESKTuqcJj0UW5eaAs0FvFrDbeSlLo7G2DLM7EOqVme3POos7jQRTmWu1I+ik++Lsdus0CuWyu4Pb/WJPEl6QAvr5CuV3qo7nwCYR4rbbc2+FwwSOTezJ94wy6NrWnytFFjN4IthPsq9fpWz8gGr1D36mUqzTKySgH9XFXWN/wdqLO1uSu6OVi9KOs="
+    "iv": "3F9SKQr8GawI16Ui",
+    "ct": "20lsBwTEwxRcZje5H7nfQ+HiDxevmKe4Mvgyk7ABIR1i0LpsDKaWOtuy10rJL7FEdpTfNm0WcKYM/grU0pLzs+TNgSziEMzpxzs+W0lrSixJ/hyQP5azyI6qTFGXBGLBunErwJX84JwRM6xM6b6Betynt/FrKoyu8V/mQoyGRYG9clQ+UJqCR6WhiVCTtx86uTeckhaNFZSI2DYC8ljxD66XQip6/ip6DFFyyKyHFafDD9q7pQF0ZA/Q"
   },
   "marco": {
-    "iv": "dMjRaF2CqzmZpHA2",
-    "ct": "GeMuG3RiHqIcZ1lQKlgAYHBQPc8L/BbgKSCwX8Gva8icSlb1f8IAJS9O3Sly7pkaPoto3s9yp0kJmDKqvkbGVZujr228SLXLlzOb8aLGo8hjUOKNlNglJoBd5ES4xswOFzTBFSjXsWs2BKg8DR+psuR4JCkOHxpNbe6jXkE6ntQCKGGfAhkWf1Kbb/6SHqCf8/kSBYuF8n1gn3lTOxAr9B8mMDXibicELg=="
+    "iv": "PJZfCtoIQ29/oDkl",
+    "ct": "zKhtkCVd8ukCXCOHGD2ZeaNm89ATJyemv1DNlm/EovhQs587i0lUheyl6PZgdgYftfQbhSISdBcoXyIRKsCLUYnvZl/Kze0td9EwJmshzN1i+UuKXxZodPxV7MzpK+fAf8IouE32e+4hWW8v3fLdPu3Gk185XaWFzYfzgOG2ZglDNdNl2kUH4TF2DCl3eLmH4IpNR1kHsG8mtZcOTg6CtgyC3dx9W0Nnv9jKy3ftqX8nk5aP3A=="
   },
   "sara": {
-    "iv": "LF1dw+Qs32xGQncv",
-    "ct": "jyPXZ1IrfRmXS/5YWTl/kqxEAYm78DESq2LPp8VpaiBrU7IGZ0OJWfo5sixXJjDuVctLhgEvGAZRBQAcfXJDBEy2eOdz+lfBsve29CiNihAyDI3+V52x1c/i+OyrP1jjlB15AZEzwLRPnTcRenHmCBRdDhqKtweHxRkt7AjL+MDymMOdSCbr3EZwJgeRmdiTsy2kfabfIvW0Qn6qom+/TaKHMoZa7jtMjg=="
+    "iv": "/MezrAYZbL4bIqbG",
+    "ct": "fxKqPJ3MgFaIDCEADGuy5jWUAqvCgFcVCmW/8QpE3o9pG4/wtiEZFN8jNf4ux3RORKLlkUTRTsUGVFTaiP3dWWtaAX3R4OKPUmLXu7CsmMV0N2PSYSvAyGGccOFG+BWXLFUGpuykeiL52ni0dKfIrt6gnrMHAKXvq5FMFWDkq/XH0cNsetRBq6+E8VmLOmeG65dhBwRzNWGSVv+7EnfING1OaetZmityaUGmrdlneJY="
   },
   "luca": {
-    "iv": "uQl9LWEYiME0aKZr",
-    "ct": "KaAtxb7mI5YsZToD48zWxYHmhY3udt2CVhQLsWjX3oY9xvBKeMqGevOON/WYJxy69t/L+HJrAPgFTKkL6H8Ua4ScLuqKwduvlMGfYvkWih05Dh6tQmSHIeYZLlYorpBsVE0Y+nlkuJ7cR4dUFCCqqtaB2Cu+o4Mud4xE75Hm8CPvutMgLHU3a7ClXm7p5uNBn0CLM2YeCnJqqYBBB4bkSTeGk2gHpJmcNP2lRvKnatfNY9mV5KdzJQ=="
+    "iv": "hFNTuGDPFrzNyaQ1",
+    "ct": "QD+CJC0aE1oawXqlg9tfqBi6/9LFvBwFfZ7fJ6UoMXUsmIbk4wvDHpwd92OoHqFBZ9tSH3wizMvpgK2EaKI05nQ9kBnjM0epSppNUVEWpeAv1cNaiW7VR1UPSRHno4H6whtwD8AvnpmNekxIXcI/7IGM97gs7TG/8dP89sCUwhUzFYyhotum2Y6DSoZLZMPjGZE8OXfSub1N8eWn4OC4kUXsUo2mbzd1mwRZosH+l+CAkBOTzfFClROwP1qnb/EZagG3alksv+raTGRQy5lhvIYdE20YyhReSwhiyF4VCRKan3LlREHFNKUFQr5hoMNYf+MMvQmic3UOVR6XzpLx"
   },
   "elena": {
-    "iv": "AUCAFtY3ZAAQFkTm",
-    "ct": "hES7VHpaBQoGX0UOK8+btK1RzE5PgB4ThGRfxOpDrOwATZQPsQX8U8Q2lWB5P6K0ROfMw6a3Io65XkLdKx0BDmfC8d0lf1b8yg53xcPfHvgeO2dF2cNzr9xpmsKrnadoJ7pNvzW7nclGQ1oLClZ52zB+4WQreKg1OtOAFOnC9430P9NMcClIqbppPer1I4e07up/nqvR3qO18iakWneNLs7osg3DWha4RpdZdIiSvv4OJdOg/J2x"
+    "iv": "epAyEnVcXe+SvFBc",
+    "ct": "gWgLW/Fwfg2Ax0JdWPy5CR+ngsjJ6K+XXawAVFpDMdJZKDqioWmddUbZ39eoYWGOJaawZBYMPvXFjFdl2/dnwn89/9GSqfrzN64QGWgD6DD//AlrG4VI+qB7svWdeH5fQaP7bSE/t7WyY2mG/FCnCPcK2AU/2LAF0VghiAWQ8v+y5L2BrrGrEWKJ3n27GLDG/ZgVBAbiYD9HOFixw7ywrl5eI9x6ajKuED0tsGoyMlns3G+ekokI0dyylGGWFCI3mA=="
   }
 };

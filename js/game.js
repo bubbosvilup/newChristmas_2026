@@ -56,6 +56,7 @@
   function onA(fn) { aHandlers.push(fn); return () => { const i = aHandlers.indexOf(fn); if (i >= 0) aHandlers.splice(i, 1); }; }
   function pressA() { const fn = aHandlers[aHandlers.length - 1]; if (fn) fn(); }
   $("#btn-a").addEventListener("click", pressA);
+  $("#btn-start").addEventListener("click", pressA);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " " || e.key === "z") { e.preventDefault(); pressA(); }
   });
@@ -158,7 +159,7 @@
       G.payload = payload;
       Sfx.unlock();
       // precarica lo sprite del bersaglio
-      new Image().src = C.spriteBase + payload.pokemon.id + ".png";
+      new Image().src = payload.sprite;
       await wait(400);
       world();
     }
@@ -170,133 +171,204 @@
   // WORLD (canvas 160x144, tile 16px, mappa 10x9)
   // =====================================================================
   const T = 16;
+  // T albero, G erba alta, X abete natalizio, O Oak, . terreno, s neve, f fiori
   const MAP = [
     "TTTTTTTTTT",
-    "T........T",
+    "Ts.X..s..T",
     "T.GGG.GG.T",
-    "T.GGG.GG.T",
-    "T........T",
-    "T.GG..GGGT",
-    "T.GG..GGGT",
-    "T...O....T",
+    "T.GGGfGG.T",
+    "T...s....T",
+    "TfGG..GGGT",
+    "T.GG.sGGGT",
+    "T.GG..GG.T",
+    "Ts..O..f.T",
     "TTTTTTTTTT"
   ];
   const cv = $("#world");
   const cx = cv.getContext("2d");
   cx.imageSmoothingEnabled = false;
 
-  // sprite giocatore 12x16 (.=trasparente, k=nero, r=rosso, s=pelle, b=blu, w=bianco)
-  const PLAYER = [
-    "....kkkk....",
-    "...krrrrk...",
-    "..krrrrrrk..",
-    "..kkkkkkkk..",
-    "..kssssssk..",
-    "..skskksks..",
-    "..kssssssk..",
-    "...kssssk...",
-    "..kbbbbbbk..",
-    ".ksbbbbbbsk.",
-    ".ksbbbbbbsk.",
-    "..kbbbbbbk..",
-    "...kbbbbk...",
-    "...kb..bk...",
-    "...kk..kk...",
-    "............"
+  // Sprite 16x16: . trasparente, k contorno, r rosso, s pelle, b blu, w bianco, h capelli, g grigio, y giallo
+  const PLAYER_DOWN = [
+    "......kkkk......",
+    ".....krrrrk.....",
+    "....krrrrrrk....",
+    "....kkkkkkkk....",
+    "....khhsshhk....",
+    "....kssssssk....",
+    "....ksksskks....",
+    "....kssssssk....",
+    ".....kssssk.....",
+    "....kbbbbbbk....",
+    "...ksbbbbbbsk...",
+    "...ksbbbbbbsk...",
+    "....kbbbbbbk....",
+    ".....kggggk.....",
+    ".....kg..gk.....",
+    ".....kk..kk....."
+  ];
+  const PLAYER_UP = [
+    "......kkkk......",
+    ".....krrrrk.....",
+    "....krrrrrrk....",
+    "....krrrrrrk....",
+    "....khhhhhhk....",
+    "....khhhhhhk....",
+    "....khhhhhhk....",
+    ".....kssssk.....",
+    "....kbbbbbbk....",
+    "...ksbbbbbbsk...",
+    "...ksbbbbbbsk...",
+    "....kbbbbbbk....",
+    ".....kggggk.....",
+    ".....kg..gk.....",
+    ".....kk..kk.....",
+    "................"
+  ];
+  const PLAYER_SIDE = [
+    "......kkkk......",
+    ".....krrrrkk....",
+    "....krrrrrrrk...",
+    "....kkkkkkkkk...",
+    "....khhsssssk...",
+    "....khsskssk....",
+    "....khsssssk....",
+    ".....kssssk.....",
+    "....kbbbbbk.....",
+    "....kbbbbbsk....",
+    "....kbbbbbsk....",
+    "....kbbbbbk.....",
+    ".....kgggk......",
+    ".....kgggk......",
+    ".....kgkgk......",
+    ".....kk.kk......"
   ];
   const OAK = [
-    "....kkkk....",
-    "...kwwwwk...",
-    "..kwwwwwwk..",
-    "..kwkwwkwk..",
-    "..kssssssk..",
-    "..skskksks..",
-    "..kssssssk..",
-    "...kwwwwk...",
-    "..kwwwwwwk..",
-    ".kswwwwwwsk.",
-    ".kswwwwwwsk.",
-    "..kwwwwwwk..",
-    "...kkkkkk...",
-    "...kk..kk...",
-    "...kk..kk...",
-    "............"
+    "......kkkk......",
+    ".....kggggk.....",
+    "....kgggggkk....",
+    "....kgssssgk....",
+    "....kssssssk....",
+    "....ksksskks....",
+    "....kssssssk....",
+    ".....kssssk.....",
+    "....kwwwwwwk....",
+    "...kswwrrwwsk...",
+    "...kswwwwwwsk...",
+    "....kwwwwwwk....",
+    "....kwwwwwwk....",
+    ".....kgggkk.....",
+    ".....kg..gk.....",
+    ".....kk..kk....."
   ];
-  const PAL = { k: "#0f380f", r: "#c02828", s: "#f0c090", b: "#2848a0", w: "#f0f0e0" };
+  const PAL = { k: "#202030", r: "#d83838", s: "#f8d0a0", b: "#3058c0", w: "#f8f8f8", h: "#503820", g: "#687080", y: "#f8e048" };
 
-  function drawSprite(sp, x, y, bob) {
+  function drawSprite(sp, x, y, { frame = 0, flip = false } = {}) {
     for (let r = 0; r < sp.length; r++) {
       const row = sp[r];
       for (let c = 0; c < row.length; c++) {
         const ch = row[c];
         if (ch === ".") continue;
         cx.fillStyle = PAL[ch];
-        // "bob": sposta le gambe di 1px nel frame di camminata
-        const dy = bob && r >= 13 ? -1 : 0;
-        cx.fillRect(x + 2 + c, y + r + dy, 1, 1);
+        // frame di camminata: le gambe si alternano
+        let dy = 0;
+        if (frame && r >= 13) dy = (frame === 1 ? (c < 8 ? -1 : 0) : (c < 8 ? 0 : -1));
+        const px = flip ? x + (row.length - 1 - c) : x + c;
+        cx.fillRect(px, y + r + dy, 1, 1);
       }
     }
   }
 
-  function drawTile(ch, x, y, frame) {
+  const GROUND = "#88d068", GROUND2 = "#78c058", DARK = "#285828", LEAF = "#48a048", LEAF2 = "#68c858", TRUNK = "#805030", SNOW = "#f8f8ff", SNOW2 = "#c8d8f0";
+  function drawTile(ch, x, y, frame, tx, ty) {
+    // terreno base con lieve texture
+    cx.fillStyle = GROUND; cx.fillRect(x, y, T, T);
+    cx.fillStyle = GROUND2;
+    if ((tx * 7 + ty * 3) % 4 === 0) { cx.fillRect(x + 3, y + 5, 2, 1); cx.fillRect(x + 10, y + 11, 2, 1); }
     if (ch === "T") {
-      cx.fillStyle = "#306230"; cx.fillRect(x, y, T, T);
-      cx.fillStyle = "#0f380f";
-      cx.fillRect(x + 2, y + 2, 12, 12);
-      cx.fillStyle = "#306230";
-      cx.fillRect(x + 4, y + 4, 3, 3); cx.fillRect(x + 9, y + 6, 3, 3); cx.fillRect(x + 5, y + 10, 3, 2);
-      cx.fillStyle = "#0f380f"; cx.fillRect(x + 7, y + 12, 2, 4);
+      // albero con cappello di neve
+      cx.fillStyle = TRUNK; cx.fillRect(x + 6, y + 11, 4, 5);
+      cx.fillStyle = DARK; cx.fillRect(x + 1, y + 3, 14, 10);
+      cx.fillStyle = LEAF; cx.fillRect(x + 2, y + 2, 12, 9);
+      cx.fillStyle = LEAF2; cx.fillRect(x + 4, y + 4, 3, 2); cx.fillRect(x + 9, y + 6, 2, 2); cx.fillRect(x + 3, y + 8, 2, 1);
+      cx.fillStyle = SNOW; cx.fillRect(x + 3, y + 1, 10, 2); cx.fillRect(x + 5, y, 6, 1); cx.fillRect(x + 2, y + 3, 3, 1); cx.fillRect(x + 10, y + 3, 3, 1);
+      cx.fillStyle = DARK; cx.fillRect(x + 5, y + 10, 6, 1);
+    } else if (ch === "X") {
+      // abete natalizio decorato
+      cx.fillStyle = TRUNK; cx.fillRect(x + 7, y + 13, 2, 3);
+      cx.fillStyle = DARK;
+      cx.fillRect(x + 7, y, 2, 1); cx.fillRect(x + 6, y + 1, 4, 2); cx.fillRect(x + 5, y + 3, 6, 2);
+      cx.fillRect(x + 4, y + 5, 8, 3); cx.fillRect(x + 3, y + 8, 10, 3); cx.fillRect(x + 2, y + 11, 12, 2);
+      cx.fillStyle = LEAF; cx.fillRect(x + 7, y + 2, 2, 1); cx.fillRect(x + 6, y + 4, 3, 1); cx.fillRect(x + 5, y + 7, 4, 1); cx.fillRect(x + 4, y + 10, 5, 1);
+      const on = Math.floor(frame / 15) % 2;
+      const lights = [[7, 1, "#f8e048"], [5, 4, "#f85050"], [10, 5, "#58c8f8"], [4, 8, "#f85050"], [11, 9, "#f8e048"], [6, 11, "#58c8f8"], [12, 12, "#f85050"], [3, 12, "#f8e048"]];
+      lights.forEach(([lx, ly, col], i) => { cx.fillStyle = (i % 2 === on) ? col : "#f8f8f8"; cx.fillRect(x + lx, y + ly, 1, 1); });
+      cx.fillStyle = "#f8e048"; cx.fillRect(x + 7, y - 1 < y ? y : y, 2, 1);
     } else if (ch === "G") {
-      cx.fillStyle = "#8bac0f"; cx.fillRect(x, y, T, T);
-      cx.fillStyle = "#306230";
+      // erba alta stile gen 2
+      cx.fillStyle = "#58a848"; cx.fillRect(x, y, T, T);
+      cx.fillStyle = "#307838";
       const o = frame % 2 ? 1 : 0;
-      for (let i = 0; i < 4; i++) {
-        const gx = x + 1 + i * 4, gy = y + 3 + ((i + o) % 2) * 6;
-        cx.fillRect(gx, gy, 1, 4); cx.fillRect(gx + 1, gy - 1, 1, 5); cx.fillRect(gx + 2, gy + 1, 1, 3);
+      for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+        const gx = x + 1 + i * 8, gy = y + 1 + j * 8 + ((i + j + o) % 2);
+        cx.fillRect(gx, gy + 2, 1, 4); cx.fillRect(gx + 2, gy, 1, 6); cx.fillRect(gx + 4, gy + 1, 1, 5); cx.fillRect(gx + 1, gy + 5, 5, 1);
       }
-    } else {
-      cx.fillStyle = "#9bbc0f"; cx.fillRect(x, y, T, T);
-      if ((x / T + y / T) % 3 === 0) { cx.fillStyle = "#8bac0f"; cx.fillRect(x + 6, y + 9, 2, 2); }
+      cx.fillStyle = "#88d868"; cx.fillRect(x + 3, y + 1, 1, 2); cx.fillRect(x + 11, y + 9, 1, 2);
+    } else if (ch === "s") {
+      // chiazza di neve
+      cx.fillStyle = SNOW2; cx.fillRect(x + 2, y + 5, 12, 8);
+      cx.fillStyle = SNOW; cx.fillRect(x + 3, y + 4, 10, 8); cx.fillRect(x + 1, y + 7, 14, 4);
+    } else if (ch === "f") {
+      // fiori che ondeggiano
+      const o = Math.floor(frame / 25) % 2;
+      cx.fillStyle = "#f8e048"; cx.fillRect(x + 3 + o, y + 4, 2, 2); cx.fillRect(x + 10, y + 9 + o, 2, 2);
+      cx.fillStyle = "#f85858"; cx.fillRect(x + 10 - o, y + 3, 2, 2); cx.fillRect(x + 4, y + 10 + o, 2, 2);
+      cx.fillStyle = "#307838"; cx.fillRect(x + 4, y + 6, 1, 2); cx.fillRect(x + 11, y + 11, 1, 2);
     }
   }
 
   const W = {
-    px: 5, py: 7,          // posizione tile
-    mx: 0, my: 0,          // offset animazione
-    moving: null,          // direzione in corso
-    held: null,
-    stepsInGrass: 0,
-    threshold: rnd(C.stepsMin, C.stepsMax),
-    frame: 0,
-    locked: true,          // bloccato durante i dialoghi
-    raf: 0,
-    lastT: 0
+    px: 5, py: 8, mx: 0, my: 0,
+    moving: null, held: null, facing: "down",
+    stepsInGrass: 0, threshold: rnd(C.stepsMin, C.stepsMax),
+    frame: 0, locked: true, raf: 0, lastT: 0
   };
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
   function tileAt(x, y) { return (MAP[y] && MAP[y][x]) || "T"; }
+  function blocked(ch) { return ch === "T" || ch === "O" || ch === "X"; }
+
+  function playerSprite() {
+    const walk = W.moving ? 1 + Math.floor(W.frame / 7) % 2 : 0;
+    if (W.facing === "up") return [PLAYER_UP, { frame: walk }];
+    if (W.facing === "left") return [PLAYER_SIDE, { frame: walk, flip: true }];
+    if (W.facing === "right") return [PLAYER_SIDE, { frame: walk }];
+    return [PLAYER_DOWN, { frame: walk }];
+  }
 
   function render() {
+    const anim = Math.floor(W.frame / 20);
     for (let y = 0; y < MAP.length; y++)
-      for (let x = 0; x < MAP[y].length; x++)
-        drawTile(tileAt(x, y) === "O" ? "." : tileAt(x, y), x * T, y * T, Math.floor(W.frame / 20));
-    drawSprite(OAK, 4 * T, 7 * T - 2, false);
-    // se il giocatore è nell'erba disegniamo l'erba sopra le gambe
+      for (let x = 0; x < MAP[y].length; x++) {
+        const ch = tileAt(x, y);
+        drawTile(ch === "O" ? "." : ch, x * T, y * T, ch === "X" ? W.frame : anim, x, y);
+      }
+    drawSprite(OAK, 4 * T, 8 * T - 2);
     const px = W.px * T + W.mx, py = W.py * T + W.my - 2;
-    drawSprite(PLAYER, px, py, W.moving && Math.floor(W.frame / 8) % 2);
+    const [sp, opt] = playerSprite();
+    drawSprite(sp, px, py, opt);
+    // nell'erba alta le gambe restano coperte
     if (tileAt(W.px, W.py) === "G" && !W.moving) {
-      cx.fillStyle = "#8bac0f"; cx.fillRect(px + 2, py + 13, 12, 5);
-      drawTile("G", W.px * T, W.py * T, Math.floor(W.frame / 20));
-      // ridisegna il busto sopra l'erba
-      cx.save(); cx.beginPath(); cx.rect(px, py, 16, 12); cx.clip(); drawSprite(PLAYER, px, py, false); cx.restore();
+      drawTile("G", W.px * T, W.py * T, anim, W.px, W.py);
+      cx.save(); cx.beginPath(); cx.rect(px, py, 16, 11); cx.clip(); drawSprite(sp, px, py, opt); cx.restore();
     }
   }
 
   function tryMove(dir) {
+    W.facing = dir;
     const [dx, dy] = DIRS[dir];
     const nx = W.px + dx, ny = W.py + dy;
-    const t = tileAt(nx, ny);
-    if (t === "T" || t === "O") { return false; }
+    if (blocked(tileAt(nx, ny))) { return false; }
     W.moving = dir;
     W.mx = -dx * T; W.my = -dy * T;
     W.px = nx; W.py = ny;
@@ -354,7 +426,7 @@
   async function world() {
     show("world");
     W.locked = true;
-    W.px = 5; W.py = 7; W.stepsInGrass = 0; W.threshold = rnd(C.stepsMin, C.stepsMax);
+    W.px = 5; W.py = 8; W.stepsInGrass = 0; W.threshold = rnd(C.stepsMin, C.stepsMax);
     if (!W.raf) { W.lastT = performance.now(); W.raf = requestAnimationFrame(loop); }
     const hintEl = $("#world-hint");
     const clickHint = () => pressA();
@@ -423,10 +495,9 @@
   let glitchTimer = 0;
   let sliceEls = [];
 
-  function buildEnemySprite(id) {
+  function buildEnemySprite(src) {
     sliceEls.forEach((e) => e.remove()); sliceEls = [];
     spriteWrap.querySelectorAll("img").forEach((e) => e.remove());
-    const src = C.spriteBase + id + ".png";
     const img = document.createElement("img");
     img.src = src; img.alt = "";
     spriteWrap.insertBefore(img, noiseCv);
@@ -487,7 +558,7 @@
     balls = C.safariBalls; attempts = 0; escaCount = 0; sassoCount = 0;
     $("#ball-count").textContent = balls;
     $("#ename").textContent = "???????";
-    buildEnemySprite(G.payload.pokemon.id);
+    buildEnemySprite(G.payload.sprite);
     const ball = $("#ball"); ball.className = "ball";
 
     await wait(300);
@@ -592,7 +663,7 @@
     $("#ename").textContent = target;
     await wait(500);
     await say(`??????? era in realtà... ${target}!`);
-    await say(`${target} (forma ${G.payload.pokemon.name}) è nelle tue mani: dovrai fargli il REGALO!`);
+    await say(`${target}${G.payload.form ? ` (forma ${G.payload.form})` : ""} è nelle tue mani: dovrai fargli il REGALO!`);
     Sfx.dex();
     await say(`I dati di ${target} sono stati registrati nel POKÉDEX.`);
     writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now() });
@@ -629,10 +700,10 @@
   function card(no) {
     show("card");
     const p = G.payload;
-    $("#card-img").src = C.spriteBase + p.pokemon.id + ".png";
+    $("#card-img").src = p.sprite;
     $("#card-no").textContent = no;
     $("#card-name").textContent = p.target.toUpperCase();
-    $("#card-type").textContent = p.type || p.pokemon.name;
+    $("#card-type").textContent = p.type || p.form || "???";
     $("#card-flavor").textContent = p.flavor || `${p.target} ti è stato assegnato dal destino (e da nessun altro).`;
     $("#card-target").textContent = p.target.toUpperCase();
     $("#card-date").textContent = C.eventDate;

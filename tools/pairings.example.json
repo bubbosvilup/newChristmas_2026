@@ -1,12 +1,12 @@
 {
-  "_commento": "Copia questo file in tools/pairings.json (ignorato da git), compila e lancia: node tools/build-secrets.mjs. 'pokemon' è il numero del Pokédex nazionale. 'pins' è opzionale: se manca viene generato un PIN a 6 cifre.",
+  "_commento": "Copia questo file in tools/pairings.json (ignorato da git), compila e lancia: node tools/build-secrets.mjs. 'sprite' è il file dell'avatar in assets/sprites; in alternativa 'pokemon' (numero del Pokédex nazionale) usa uno sprite PokéAPI. 'form' è l'etichetta mostrata al reveal. 'pins' è opzionale: se manca viene generato un PIN a 6 cifre.",
   "people": {
-    "Nicco":  { "pokemon": 25,  "pokemonName": "Pikachu",   "type": "Elettro / Caffè",     "flavor": "Emette scariche se gli parli prima del caffè. Debolezza: i regali banali." },
-    "Giulia": { "pokemon": 133, "pokemonName": "Eevee",     "type": "Normale / Coccole",   "flavor": "Si evolve in base all'umore. Non si sa mai in cosa." },
-    "Marco":  { "pokemon": 143, "pokemonName": "Snorlax",   "type": "Normale / Divano",    "flavor": "Blocca il passaggio dopo pranzo. Si sveglia solo col panettone." },
-    "Sara":   { "pokemon": 39,  "pokemonName": "Jigglypuff", "type": "Folletto / Karaoke", "flavor": "Canta finché tutti non si addormentano. Poi si offende." },
-    "Luca":   { "pokemon": 58,  "pokemonName": "Growlithe", "type": "Fuoco / Fedeltà",     "flavor": "Insegue qualsiasi cosa gli lanci. Soprattutto le polemiche." },
-    "Elena":  { "pokemon": 54,  "pokemonName": "Psyduck",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
+    "Nicco":  { "sprite": "1.png", "form": "Scout",   "type": "Elettro / Caffè",     "flavor": "Emette scariche se gli parli prima del caffè. Debolezza: i regali banali." },
+    "Giulia": { "sprite": "2.png", "form": "Bunny",     "type": "Normale / Coccole",   "flavor": "Si evolve in base all'umore. Non si sa mai in cosa." },
+    "Marco":  { "sprite": "3.png", "form": "Paglietta",   "type": "Normale / Divano",    "flavor": "Blocca il passaggio dopo pranzo. Si sveglia solo col panettone." },
+    "Sara":   { "sprite": "4.png", "form": "Occhialuta", "type": "Folletto / Karaoke", "flavor": "Canta finché tutti non si addormentano. Poi si offende." },
+    "Luca":   { "sprite": "5.png", "form": "Polo", "type": "Fuoco / Fedeltà",     "flavor": "Insegue qualsiasi cosa gli lanci. Soprattutto le polemiche." },
+    "Elena":  { "pokemon": 54, "form": "Psyduck",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
   },
   "pairings": {
     "Nicco": "Giulia",

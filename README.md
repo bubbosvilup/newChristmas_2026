@@ -12,7 +12,8 @@ e nel Pokédex scopri a chi devi fare il regalo. L'esito sembra casuale ma è de
 ## Configurare gli accoppiamenti
 
 1. Copia `tools/pairings.example.json` in `tools/pairings.json` (è ignorato da git, **non committarlo**).
-2. Compila `people` (nome → Pokémon, tipo scherzoso, testo flavour), `pairings` (chi regala a chi) e,
+2. Metti gli avatar (PNG con sfondo trasparente) in `assets/sprites/`. Compila `people` (nome → `sprite`, oppure `pokemon`
+   per uno sprite PokéAPI; `form`, tipo scherzoso, testo flavour), `pairings` (chi regala a chi) e,
    se vuoi, `pins` (6 cifre; altrimenti vengono generati).
 3. Genera i segreti:
 
@@ -52,5 +53,7 @@ js/secrets.js     accoppiamenti cifrati (generato)
 js/crypto.js      decifratura nel browser
 js/audio.js       suoni 8-bit con WebAudio
 js/game.js        macchina a stati e logica di gioco
+assets/sprites/   avatar dei partecipanti (PNG trasparenti)
 tools/            generatore dei segreti
+tools/cutout.py   rimuove lo sfondo bianco da un avatar e lo rende sprite quadrato
 ```

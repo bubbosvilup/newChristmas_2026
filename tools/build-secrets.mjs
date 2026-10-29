@@ -12,6 +12,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const input = resolve(process.argv[2] || resolve(here, "pairings.json"));
 const output = resolve(here, "..", "js", "secrets.js");
 const ITER = 150000; // deve coincidere con js/crypto.js
+const SPRITE_BASE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/";
 
 const slug = (n) => n.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const enc = new TextEncoder();
@@ -54,9 +55,12 @@ for (const giver of names) {
   const r = people[receiver];
   const pin = String(pins[giver] || String(randomInt(0, 1000000)).padStart(6, "0"));
   if (!/^\d{6}$/.test(pin)) { console.error(`PIN di ${giver} deve essere di 6 cifre`); process.exit(1); }
+  if (!r.sprite && !r.pokemon) { console.error(`${receiver}: serve "sprite" (file in assets/sprites) o "pokemon"`); process.exit(1); }
   const payload = {
     target: receiver,
-    pokemon: { id: r.pokemon, name: r.pokemonName || `#${r.pokemon}` },
+    // sprite locale (avatar) oppure, in mancanza, sprite PokéAPI
+    sprite: r.sprite ? "assets/sprites/" + r.sprite : SPRITE_BASE + r.pokemon + ".png",
+    form: r.form || r.pokemonName || "",
     type: r.type || "",
     flavor: r.flavor || ""
   };
