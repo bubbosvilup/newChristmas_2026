@@ -37,6 +37,19 @@
           <div class="copy">©2026 NICCO INC.</div>
         </section>
 
+        <!-- INTRO: PROF. OAK -->
+        <section class="scr" id="scr-intro">
+          <div class="intro-stage">
+            <div class="spotlight"></div>
+            <canvas id="portrait" class="portrait" width="48" height="52"></canvas>
+          </div>
+          <div class="dialog" id="intro-box">
+            <div class="dialog-name">PROF. OAK</div>
+            <p id="itext"></p>
+            <span class="cursor" id="icursor">▼</span>
+          </div>
+        </section>
+
         <!-- LOGIN -->
         <section class="scr menu-bg" id="scr-login">
           <div class="box">
@@ -60,7 +73,10 @@
         <!-- MONDO -->
         <section class="scr" id="scr-world">
           <canvas id="world" width="160" height="160"></canvas>
-          <div class="hint" id="world-hint">Vai nell'erba alta!</div>
+          <div class="dialog hint" id="world-hint">
+            <p id="wtext"></p>
+            <span class="cursor" id="wcursor">▼</span>
+          </div>
         </section>
 
         <!-- BATTAGLIA -->
@@ -68,7 +84,7 @@
           <div class="field"></div>
           <div class="enemy">
             <div class="namebox">
-              <div class="nb-row"><span class="ename" id="ename">???????</span><span class="elvl">L??</span></div>
+              <div class="nb-row"><span class="ename" id="ename">???????</span><span class="elvl" id="elvl">L??</span></div>
               <div class="hpbar"><span>HP</span><i><b></b></i></div>
             </div>
             <div class="ground enemy-ground"></div>
@@ -82,7 +98,11 @@
             <canvas class="trainer" id="trainer" width="24" height="25"></canvas>
           </div>
           <div class="ball" id="ball"></div>
-          <div class="textbox">
+          <div class="throwbar" id="throwbar">
+            <div class="track"><i class="zone good"></i><i class="zone perfect"></i><b id="throwcur"></b></div>
+            <div class="throwlabel">PREMI A</div>
+          </div>
+          <div class="dialog textbox">
             <p id="btext"></p>
             <span class="cursor" id="bcursor">▼</span>
           </div>
@@ -101,9 +121,10 @@
               <span class="lens"></span>
               <span class="dots"><i></i><i></i><i></i></span>
               <span class="dex-title">POKÉDEX</span>
-              <span id="dex-count" class="dex-count">1/6</span>
             </div>
+            <div class="dex-sub"><span>ALLENATORE <b id="dex-trainer"></b></span><span id="dex-count" class="dex-count"></span></div>
             <ul id="dex-list" class="dex-list"></ul>
+            <div class="dex-msg" id="dex-msg"></div>
             <div class="dex-foot">▶ Tocca la voce catturata per i dettagli</div>
           </div>
         </section>
@@ -116,11 +137,13 @@
               <div class="card-id">
                 <div class="card-no">No.<span id="card-no">001</span></div>
                 <div class="card-name" id="card-name"></div>
-                <div class="card-type">TIPO <span id="card-type"></span></div>
+                <div class="card-form" id="card-form"></div>
+                <div class="card-type" id="card-type"></div>
               </div>
             </div>
             <div class="card-flavor" id="card-flavor"></div>
             <div class="card-gift">
+              <div class="gift-row"><span class="gift-k">ALLENATORE</span><b id="card-trainer"></b></div>
               <div class="gift-row"><span class="gift-k">REGALO A</span><b id="card-target"></b></div>
               <div class="gift-row"><span class="gift-k">CONSEGNA</span><b id="card-date"></b></div>
               <div class="gift-row"><span class="gift-k">BUDGET</span><b id="card-budget"></b></div>
@@ -131,6 +154,7 @@
 
         <div id="flash"></div>
         <div id="wipe"></div>
+        <div id="fade"></div>
       </div>
     </div>
 
@@ -163,6 +187,9 @@
 <script src="js/secrets.js"></script>
 <script src="js/crypto.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/music.js"></script>
+<script src="js/pixel.js"></script>
+<script src="js/world.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

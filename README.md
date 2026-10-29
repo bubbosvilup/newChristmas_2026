@@ -1,8 +1,10 @@
 # Babbo Natale Segreto · Versione Glitch
 
 Mini-gioco in stile Pokémon (Game Boy) per sorteggiare i regali di Natale tra 6 persone.
-Cammini nell'erba alta della Zona Safari, incontri un **???????** glitchato, lo catturi con le Safari Ball
-e nel Pokédex scopri a chi devi fare il regalo. L'esito sembra casuale ma è deciso in anticipo.
+Il Prof. Oak ti accoglie, scegli chi sei, poi esplori la Zona Safari innevata (lago ghiacciato, abete con le luci,
+Babbo Natale, un rivale insopportabile). Nell'erba alta incontri qualche Pokémon normale e poi **???????**, un
+Pokémon dai dati corrotti: lo catturi con le Safari Ball (lancio a tempo) e nel Pokédex scopri a chi devi fare il
+regalo. L'esito sembra casuale ma è deciso in anticipo.
 
 - Solo HTML/CSS/JS, nessuna dipendenza, nessun backend: gira su **GitHub Pages**.
 - Pensato per il telefono (d-pad e tasti A/B su schermo), funziona anche da PC (frecce/WASD, Invio).
@@ -29,6 +31,19 @@ e stampa i PIN da mandare in privato a ciascuno.
 
 > Il file `js/secrets.js` attualmente nel repo è generato dall'esempio (PIN `111111`…`666666`): va rigenerato con i dati veri.
 
+## Musica
+
+Di default suona una colonna sonora chiptune generata nel browser (`js/music.js`: Jingle Bells al titolo, brani
+originali per mondo, battaglia, vittoria e Pokédex). Per usare file propri metti gli mp3/ogg in `assets/music/` e
+indicali in `js/config.js`:
+
+```js
+music: { title: "assets/music/title.mp3", world: "assets/music/world.mp3", battle: "assets/music/battle.mp3",
+         victory: "assets/music/victory.mp3", dex: "assets/music/dex.mp3" }
+```
+
+Le scene non indicate continuano a usare il chiptune.
+
 ## Pubblicare su GitHub Pages
 
 Settings → Pages → Source: *Deploy from a branch* → branch principale, cartella `/ (root)`.
@@ -51,8 +66,11 @@ style.css         stile Game Boy, controlli touch
 js/config.js      configurazione pubblica (nomi, data, budget)
 js/secrets.js     accoppiamenti cifrati (generato)
 js/crypto.js      decifratura nel browser
-js/audio.js       suoni 8-bit con WebAudio
-js/game.js        macchina a stati e logica di gioco
+js/audio.js       effetti sonori 8-bit con WebAudio
+js/music.js       sequencer chiptune e colonna sonora
+js/pixel.js       sprite e ritratti in pixel art (giocatore, Oak, Babbo Natale, rivale)
+js/world.js       overworld: mappa 20x18 con camera, edifici, NPC, cartelli
+js/game.js        macchina a stati: titolo, intro, login, mondo, battaglia, Pokédex
 assets/sprites/   avatar dei partecipanti (PNG trasparenti)
 tools/            generatore dei segreti
 tools/cutout.py   rimuove lo sfondo bianco da un avatar e lo rende sprite quadrato
