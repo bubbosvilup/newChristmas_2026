@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#1b1b2f">
+  <title>Babbo Natale Segreto · Versione Glitch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="shell">
+    <div id="screen">
+
+      <!-- TITOLO -->
+      <section class="scr" id="scr-title">
+        <div class="logo">
+          <div class="logo-top">BABBO NATALE</div>
+          <div class="logo-main">SEGRETO</div>
+          <div class="logo-sub">Versione Glitch</div>
+        </div>
+        <div class="title-art"><canvas class="missingno" id="missingno" width="32" height="32" aria-hidden="true"></canvas></div>
+        <div class="blink press-start">PREMI START</div>
+        <div class="copy">©2026 NICCO INC.</div>
+      </section>
+
+      <!-- LOGIN -->
+      <section class="scr" id="scr-login">
+        <div class="panel">
+          <div class="panel-title">CHI SEI, ALLENATORE?</div>
+          <div id="name-list" class="name-list"></div>
+        </div>
+      </section>
+
+      <!-- PIN -->
+      <section class="scr" id="scr-pin">
+        <div class="panel">
+          <div class="panel-title">PIN SEGRETO</div>
+          <div class="pin-who">Allenatore <span id="pin-who"></span></div>
+          <div id="pin-boxes" class="pin-boxes"></div>
+          <div id="pin-msg" class="pin-msg">&nbsp;</div>
+          <div id="keypad" class="keypad"></div>
+          <button class="link" id="pin-back">← cambia nome</button>
+        </div>
+      </section>
+
+      <!-- MONDO -->
+      <section class="scr" id="scr-world">
+        <canvas id="world" width="160" height="144"></canvas>
+        <div class="hint" id="world-hint">Vai nell'erba alta!</div>
+      </section>
+
+      <!-- BATTAGLIA -->
+      <section class="scr" id="scr-battle">
+        <div class="enemy">
+          <div class="namebox">
+            <span class="ename" id="ename">???????</span>
+            <span class="elvl">L??</span>
+            <div class="hpbar"><i></i></div>
+          </div>
+          <div class="sprite-wrap" id="enemy-sprite">
+            <canvas id="glitch-noise" width="96" height="96"></canvas>
+          </div>
+          <div class="ground enemy-ground"></div>
+        </div>
+        <div class="player">
+          <div class="safari-box">SAFARI BALL <span>×</span><span id="ball-count">30</span></div>
+          <canvas class="trainer" id="trainer" width="28" height="28"></canvas>
+          <div class="ground player-ground"></div>
+        </div>
+        <div class="ball" id="ball"></div>
+        <div class="textbox">
+          <p id="btext"></p>
+          <span class="cursor" id="bcursor">▼</span>
+        </div>
+        <div class="menu" id="bmenu">
+          <button data-act="ball">BALL</button>
+          <button data-act="esca">ESCA</button>
+          <button data-act="sasso">SASSO</button>
+          <button data-act="fuga">FUGA</button>
+        </div>
+      </section>
+
+      <!-- POKEDEX -->
+      <section class="scr" id="scr-dex">
+        <div class="dex">
+          <div class="dex-head">
+            <span>POKÉDEX</span>
+            <span id="dex-count">1/6</span>
+          </div>
+          <ul id="dex-list" class="dex-list"></ul>
+          <div class="dex-foot">Tocca la voce per i dettagli</div>
+        </div>
+      </section>
+
+      <!-- SCHEDA -->
+      <section class="scr" id="scr-card">
+        <div class="card">
+          <div class="card-top">
+            <div class="card-sprite"><img id="card-img" alt=""></div>
+            <div class="card-id">
+              <div>No.<span id="card-no">001</span></div>
+              <div class="card-name" id="card-name"></div>
+              <div class="card-type">Tipo: <span id="card-type"></span></div>
+            </div>
+          </div>
+          <div class="card-flavor" id="card-flavor"></div>
+          <div class="card-gift">
+            <div>🎁 Devi fare un regalo a: <b id="card-target"></b></div>
+            <div>📅 Consegna: <b id="card-date"></b></div>
+            <div>💰 Budget: <b id="card-budget"></b></div>
+          </div>
+          <button class="btn" id="card-back">← Pokédex</button>
+        </div>
+      </section>
+
+      <div id="flash"></div>
+      <div id="wipe"></div>
+    </div>
+
+    <!-- CONTROLLI -->
+    <div id="controls">
+      <div class="dpad" id="dpad">
+        <button data-dir="up" aria-label="su"></button>
+        <button data-dir="left" aria-label="sinistra"></button>
+        <button data-dir="right" aria-label="destra"></button>
+        <button data-dir="down" aria-label="giù"></button>
+        <i></i>
+      </div>
+      <div class="ab">
+        <button id="btn-b" aria-label="B">B</button>
+        <button id="btn-a" aria-label="A">A</button>
+      </div>
+      <div class="startsel">
+        <button id="btn-mute" aria-label="audio">SOUND</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/secrets.js"></script>
+<script src="js/crypto.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

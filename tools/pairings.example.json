@@ -1,0 +1,27 @@
+{
+  "_commento": "Copia questo file in tools/pairings.json (ignorato da git), compila e lancia: node tools/build-secrets.mjs. 'pokemon' è il numero del Pokédex nazionale. 'pins' è opzionale: se manca viene generato un PIN a 6 cifre.",
+  "people": {
+    "Nicco":  { "pokemon": 25,  "pokemonName": "Pikachu",   "type": "Elettro / Caffè",     "flavor": "Emette scariche se gli parli prima del caffè. Debolezza: i regali banali." },
+    "Giulia": { "pokemon": 133, "pokemonName": "Eevee",     "type": "Normale / Coccole",   "flavor": "Si evolve in base all'umore. Non si sa mai in cosa." },
+    "Marco":  { "pokemon": 143, "pokemonName": "Snorlax",   "type": "Normale / Divano",    "flavor": "Blocca il passaggio dopo pranzo. Si sveglia solo col panettone." },
+    "Sara":   { "pokemon": 39,  "pokemonName": "Jigglypuff", "type": "Folletto / Karaoke", "flavor": "Canta finché tutti non si addormentano. Poi si offende." },
+    "Luca":   { "pokemon": 58,  "pokemonName": "Growlithe", "type": "Fuoco / Fedeltà",     "flavor": "Insegue qualsiasi cosa gli lanci. Soprattutto le polemiche." },
+    "Elena":  { "pokemon": 54,  "pokemonName": "Psyduck",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
+  },
+  "pairings": {
+    "Nicco": "Giulia",
+    "Giulia": "Marco",
+    "Marco": "Sara",
+    "Sara": "Luca",
+    "Luca": "Elena",
+    "Elena": "Nicco"
+  },
+  "pins": {
+    "Nicco": "111111",
+    "Giulia": "222222",
+    "Marco": "333333",
+    "Sara": "444444",
+    "Luca": "555555",
+    "Elena": "666666"
+  }
+}
