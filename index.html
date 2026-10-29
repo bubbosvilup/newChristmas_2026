@@ -183,6 +183,22 @@
   </div>
 </div>
 
+<div id="errbox" hidden></div>
+<script>
+// Diagnostica: se il gioco va in errore, mostra il messaggio a schermo invece di una schermata vuota.
+window.addEventListener("error", function (e) {
+  var b = document.getElementById("errbox");
+  if (!b) return;
+  b.hidden = false;
+  b.textContent += "ERRORE: " + (e.message || e.type) + (e.filename ? " @ " + e.filename.split("/").pop() + ":" + e.lineno : "") + "\n";
+});
+window.addEventListener("unhandledrejection", function (e) {
+  var b = document.getElementById("errbox");
+  if (!b) return;
+  b.hidden = false;
+  b.textContent += "PROMISE: " + (e.reason && e.reason.message || e.reason) + "\n";
+});
+</script>
 <script src="js/config.js"></script>
 <script src="js/secrets.js"></script>
 <script src="js/crypto.js"></script>

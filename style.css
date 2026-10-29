@@ -479,3 +479,5 @@ body {
 .sprite-wrap.pokeapi img, .sprite-wrap.pokeapi .slice { transform: scale(1.55); transform-origin: 50% 92%; }
 .dex-list li { padding: .5em .8em; font-size: .78em; gap: .7em; }
 .dex-list li img { width: 3.2em; height: 3.2em; }
+
+#errbox { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 999; background: #fff3cd; color: #5a2a00; border: 2px solid #b8860b; border-radius: 6px; padding: 8px; font: 10px/1.5 monospace; white-space: pre-wrap; word-break: break-word; }
