@@ -2,6 +2,10 @@
    Flusso: title → intro (Oak) → login → pin → world ⇄ battle → dex (→ card)
 */
 (() => {
+  // Se un file è stato bloccato (ad blocker, rete), dillo chiaramente invece di morire in silenzio.
+  for (const g of ["CONFIG", "SECRETS", "Vault", "Sfx", "Music", "Pix", "World"]) {
+    if (!window[g]) throw new Error("File JS mancante o bloccato dal browser: " + g + ". Disattiva il blocco pubblicità per questo sito e ricarica.");
+  }
   const C = window.CONFIG;
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -554,6 +558,15 @@
       list.appendChild(li);
     });
     $("#dex-count").textContent = `VISTI 6 · CATTURATI 1`;
+    $("#dex-reset").onclick = () => {
+      Sfx.blip();
+      if (!confirm("Vuoi cancellare la partita e ricominciare da capo?")) return;
+      localStorage.removeItem(C.saveKey);
+      G.save = null; G.payload = null; G.player = null; G.decoysSeen = 0; G.talked = {};
+      balls = C.safariBalls;
+      Music.stop();
+      title();
+    };
     if (returning) Sfx.dex();
   }
   let dexMsgT = 0;

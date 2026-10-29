@@ -56,7 +56,7 @@ Serve un server (la cifratura usa WebCrypto, che richiede https o localhost):
 npx http-server -p 8080
 ```
 
-Per rigiocare dopo aver completato: apri `index.html?reset`.
+Per rigiocare dopo aver completato: tasto **NUOVA PARTITA** in fondo al Pokédex, oppure apri `index.html?reset`.
 
 ## Struttura
 
@@ -65,10 +65,10 @@ index.html        schermate (titolo, login, PIN, mondo, battaglia, Pokédex, sch
 style.css         stile Game Boy, controlli touch
 js/config.js      configurazione pubblica (nomi, data, budget)
 js/secrets.js     accoppiamenti cifrati (generato)
-js/crypto.js      decifratura nel browser
+js/vault.js       decifratura nel browser (il nome evita i filtri anti-miner dei blocker)
 js/audio.js       effetti sonori 8-bit con WebAudio
 js/music.js       sequencer chiptune e colonna sonora
-js/pixel.js       sprite e ritratti in pixel art (giocatore, Oak, Babbo Natale, rivale)
+js/sprites.js     sprite e ritratti in pixel art (non chiamarlo pixel.js: gli ad blocker lo bloccano)
 js/world.js       overworld: mappa 20x18 con camera, edifici, NPC, cartelli
 js/game.js        macchina a stati: titolo, intro, login, mondo, battaglia, Pokédex
 assets/sprites/   avatar dei partecipanti (PNG trasparenti)

@@ -313,7 +313,8 @@ body {
 .dex-list li .nm { flex: 1; }
 .dex-list li.caught .nm::after { content: ' ▶'; color: var(--red); }
 .dex-list li.ghost { color: #6a7a6a; }
-.dex-foot { font-size: .55em; text-align: center; padding: .5em .5em .6em; color: #f8d8d8; }
+.dex-foot { font-size: .55em; text-align: center; padding: .5em .5em .6em; color: #f8d8d8; display: flex; justify-content: space-between; align-items: center; gap: .5em; }
+.dex-foot .reset { font: inherit; background: #2b0a10; color: #ffd84d; border: .2em solid #ffd84d; border-radius: .4em; padding: .5em .6em; }
 
 /* ---------- CARD ---------- */
 #scr-card { background: linear-gradient(160deg, #e03040, #b01828); padding: .7em; overflow: hidden; }
