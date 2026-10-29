@@ -6,7 +6,7 @@
     "Marco":  { "sprite": "3.png", "form": "Paglietta",   "type": "Normale / Divano",    "flavor": "Blocca il passaggio dopo pranzo. Si sveglia solo col panettone." },
     "Sara":   { "sprite": "4.png", "form": "Occhialuta", "type": "Folletto / Karaoke", "flavor": "Canta finché tutti non si addormentano. Poi si offende." },
     "Luca":   { "sprite": "5.png", "form": "Polo", "type": "Fuoco / Fedeltà",     "flavor": "Insegue qualsiasi cosa gli lanci. Soprattutto le polemiche." },
-    "Elena":  { "pokemon": 54, "form": "Psyduck",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
+    "Elena":  { "sprite": "6.png", "form": "Riccio",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
   },
   "pairings": {
     "Nicco": "Giulia",
