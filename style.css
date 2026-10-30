@@ -26,6 +26,7 @@ body {
 #app { height: 100dvh; display: flex; justify-content: center; }
 #shell {
   width: 100%;
+  overflow: hidden;
   max-width: 460px;
   display: flex;
   flex-direction: column;
@@ -386,7 +387,7 @@ body {
 .ab button span { display: inline-block; transform: rotate(22deg); }
 .ab button:active { transform: translateY(3px); box-shadow: inset 0 -2px 0 rgba(0,0,0,.4); }
 #btn-b { margin-top: 20px; }
-.startsel { display: flex; justify-content: center; gap: 14px; transform: rotate(-22deg); }
+.startsel { display: flex; justify-content: center; gap: 14px; }
 .startsel button {
   font: inherit; font-size: 7px; color: #f4c6cc;
   background: linear-gradient(#5a5a70, #33334a); border: 0; border-radius: 10px; padding: 7px 14px;
@@ -400,7 +401,7 @@ body {
 
 @media (max-height: 700px) {
   #controls { min-height: 120px; }
-  .startsel { transform: rotate(-10deg); gap: 10px; }
+  .startsel { gap: 10px; }
   .startsel button { padding: 6px 10px; }
   .speaker { display: none; }
   .ab { transform: rotate(-16deg); }
@@ -482,3 +483,51 @@ body {
 .dex-list li img { width: 3.2em; height: 3.2em; }
 
 #errbox { position: fixed; left: 8px; right: 8px; bottom: 8px; z-index: 999; background: #fff3cd; color: #5a2a00; border: 2px solid #b8860b; border-radius: 6px; padding: 8px; font: 10px/1.5 monospace; white-space: pre-wrap; word-break: break-word; }
+
+/* ---------- NATALE: HUD regali, neve in battaglia, master ball ---------- */
+.gift-hud {
+  position: absolute; left: .5em; top: .5em; z-index: 5;
+  background: rgba(248,248,240,.92); border: .2em solid #303040; border-radius: .4em;
+  padding: .4em .5em .4em 1.9em; font-size: .7em; color: #303040;
+}
+.gift-hud::before {
+  content: ''; position: absolute; left: .45em; top: 50%; width: 1em; height: 1em; transform: translateY(-50%);
+  background: linear-gradient(#d83838, #d83838) 50% 0 / 100% 100% no-repeat; border: .1em solid #303040;
+  box-shadow: inset 0 .3em 0 -.2em #f8e048, inset .3em 0 0 -.2em #f8e048;
+}
+.gift-hud.done { background: #ffd84d; }
+.gift-hud.pop { animation: pop .5s; }
+.battle-snow { opacity: .55; z-index: 1; pointer-events: none; animation-duration: 12s; }
+.ball.master { background: linear-gradient(#f0c030 0 46%, #222 46% 58%, #fff 58%); box-shadow: 0 0 .6em #ffd84d; }
+
+/* ---------- ANIMAZIONI DI SCENA ---------- */
+@keyframes rise { from { transform: translateY(1.2em); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fadeup { from { transform: translateY(.6em); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes drop { 0% { transform: translateY(-3em) scale(1.15); opacity: 0; } 60% { transform: translateY(.25em) scale(.98); opacity: 1; } 100% { transform: none; } }
+@keyframes burst { from { transform: translate(-50%,-50%) scale(.2); opacity: .9; } to { transform: translate(-50%,-50%) scale(1.6); opacity: 0; } }
+#scr-title.on .logo { animation: drop .9s cubic-bezier(.2,.8,.3,1.2) both; }
+#scr-title.on .title-art { animation: fadeup .8s .5s both; }
+#scr-title.on .press-start { animation: blink 1s steps(2) infinite, fadeup .5s 1s both; }
+#scr-intro.on .portrait { animation: bob 2.4s ease-in-out infinite, fadeup .6s both; }
+#scr-intro.on .dialog { animation: rise .35s .3s both; }
+.hint.on { animation: rise .22s ease-out both; }
+.name-list button, .keypad button { animation: fadeup .35s both; }
+.name-list button:nth-child(2), .keypad button:nth-child(2) { animation-delay: .05s; }
+.name-list button:nth-child(3), .keypad button:nth-child(3) { animation-delay: .1s; }
+.name-list button:nth-child(4), .keypad button:nth-child(4) { animation-delay: .15s; }
+.name-list button:nth-child(5), .keypad button:nth-child(5) { animation-delay: .2s; }
+.name-list button:nth-child(6), .keypad button:nth-child(6) { animation-delay: .25s; }
+.scr.on .box { animation: fadeup .3s both; }
+#scr-battle.enter .textbox { animation: rise .4s .5s both; }
+#scr-battle.enter .namebox { animation: fadeup .4s .7s both; }
+#scr-battle.enter .safari-box { animation: fadeup .4s .8s both; }
+.menu.on { animation: fadeup .18s both; }
+.menu button { animation: fadeup .25s both; }
+.menu button:nth-child(2) { animation-delay: .04s; } .menu button:nth-child(3) { animation-delay: .08s; } .menu button:nth-child(4) { animation-delay: .12s; }
+.sprite-wrap.revealed::before { content: ''; position: absolute; left: 50%; top: 55%; width: 12em; height: 12em; border-radius: 50%; background: radial-gradient(circle, #fff 0 30%, rgba(255,232,120,.8) 45%, transparent 70%); animation: burst .7s ease-out both; pointer-events: none; }
+.dex-list li { animation: fadeup .3s both; }
+.dex-list li:nth-child(2) { animation-delay: .05s; } .dex-list li:nth-child(3) { animation-delay: .1s; } .dex-list li:nth-child(4) { animation-delay: .15s; } .dex-list li:nth-child(5) { animation-delay: .2s; } .dex-list li:nth-child(6) { animation-delay: .25s; }
+#scr-card.on .card { animation: fadeup .3s both; }
+#scr-card.on .card-sprite img { animation: pop .5s .15s both; }
+#flash.once { animation: flash .4s steps(2) 1; }
+.gift-hud.pop { animation: pop .5s; }

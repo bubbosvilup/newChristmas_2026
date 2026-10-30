@@ -17,7 +17,7 @@
   const dpad = $("#dpad");
   const abBtns = $(".ab");
 
-  const G = { scr: null, player: null, payload: null, save: null, decoysSeen: 0, threshold: 0, talked: {} };
+  const G = { scr: null, player: null, payload: null, save: null, decoysSeen: 0, threshold: 0, talked: {}, masterBall: false, gifts: 0 };
 
   // ---------- UI base ----------
   function show(id) {
@@ -61,14 +61,14 @@
   let typing = false, skipType = false;
   function makeDialog(box, textEl, cursorEl) {
     box.addEventListener("click", () => { if (typing) skipType = true; else pressA(); });
-    return async function say(text, { hold = true, speed = 26 } = {}) {
+    return async function say(text, { hold = true, speed = 26, voice = false } = {}) {
       cursorEl.classList.remove("on");
       textEl.textContent = "";
       typing = true; skipType = false;
       for (let i = 0; i < text.length; i++) {
         if (skipType) { textEl.textContent = text; break; }
         textEl.textContent += text[i];
-        if (i % 3 === 0 && text[i] !== " ") Sfx.blip();
+        if (i % 3 === 0 && text[i] !== " ") (voice ? Sfx.voice : Sfx.blip)();
         await wait(speed);
       }
       typing = false;
@@ -110,28 +110,45 @@
   // =====================================================================
   // INTRO con il Prof. OAK
   // =====================================================================
-  const sayIntro = makeDialog($("#intro-box"), $("#itext"), $("#icursor"));
+  const sayIntroRaw = makeDialog($("#intro-box"), $("#itext"), $("#icursor"));
+  const sayIntro = (text, o) => sayIntroRaw(text, Object.assign({ voice: true, speed: 30 }, o || {}));
   const portrait = $("#portrait").getContext("2d");
+  // Oak parla (bocca che si muove mentre il testo scorre) e sbatte le ciglia
+  let oakAnim = 0, oakBlink = false, oakBlinkT = 0;
+  function oakStart() {
+    clearInterval(oakAnim);
+    oakBlinkT = performance.now() + 1800;
+    oakAnim = setInterval(() => {
+      const now = performance.now();
+      if (now > oakBlinkT) { oakBlink = !oakBlink; oakBlinkT = now + (oakBlink ? 140 : 2200 + Math.random() * 2500); }
+      const mouth = typing ? (Math.floor(now / 110) % 2) : 0;
+      Pix.oakPortrait(portrait, { mouth, blink: oakBlink });
+    }, 55);
+  }
+  function oakStop() { clearInterval(oakAnim); oakAnim = 0; Pix.oakPortrait(portrait); }
 
   async function intro() {
     show("intro");
     $("#scr-intro").classList.remove("named");
-    Pix.oakPortrait(portrait);
-    await wait(300);
+    oakStart();
+    await wait(700);
     await sayIntro("Salve! Benvenuto nel mondo dei POKÉMON!");
     await sayIntro("Il mio nome è OAK. La gente mi chiama il PROFESSORE dei Pokémon.");
     await sayIntro("Questo mondo è abitato da creature chiamate POKÉMON. Alcune... somigliano stranamente ai tuoi amici.");
     await sayIntro("Quest'anno il BABBO NATALE SEGRETO non si estrae da un cappello. Si CATTURA.");
     await sayIntro("Ma prima di tutto, dimmi: tu chi sei?");
+    oakStop();
     login();
   }
 
   async function introAfterPin() {
     show("intro");
     $("#scr-intro").classList.add("named");
+    oakStart();
     await sayIntro(`${G.player.toUpperCase()}! Certo, ora ricordo. Il tuo PIN è corretto.`);
     await sayIntro("Là fuori, nell'erba alta della ZONA SAFARI, si nasconde la persona a cui farai il regalo.");
     await sayIntro("I suoi dati sono CORROTTI: la riconoscerai solo dopo averla catturata. Il tuo viaggio comincia ora!");
+    oakStop();
     Music.stop();
     await fadeOut();
     world();
@@ -210,7 +227,19 @@
     World.lock(false);
   }
 
+  function updateHud() {
+    const g = World.gifts;
+    $("#gift-hud").textContent = `${g.found}/${g.total}`;
+    $("#gift-hud").classList.toggle("done", g.found === g.total);
+  }
+
   World.init($("#world"), {
+    async onGift(n, total) {
+      Sfx.gift(); updateHud(); G.gifts = n;
+      const hud = $("#gift-hud"); hud.classList.remove("pop"); void hud.offsetWidth; hud.classList.add("pop");
+      if (n === total) await worldSay([`Hai trovato un REGALO! (${n}/${total})`, "Sono tutti! BABBO NATALE vorrà saperlo..."]);
+      else await worldSay([`Hai trovato un REGALO! (${n}/${total})`]);
+    },
     onGrassStep(n) {
       if (n >= G.threshold) { encounter({ kind: "glitch" }); return; }
       const forceDecoy = G.decoysSeen === 0 && n >= G.threshold - 3;
@@ -253,10 +282,27 @@
       "Cerca nell'ERBA ALTA. E se trovi un Pokémon che sembra... rotto, non avere paura. È lui.",
       "Vai! E ricorda: il regalo NON si ricicla."
     ]),
-    santa: () => [
-      "HO HO HO! Quest'anno niente slitta: i regali ve li consegnate da soli. Io supervisiono.",
-      `Budget: ${C.budget}. Niente regali riciclati, ${NAME()}. Lo so sempre.`
-    ],
+    santa: () => {
+      const g = World.gifts;
+      if (G.masterBall) return [pick(["Trovato il tuo Pokémon? La MASTER BALL non sbaglia mai. Quasi.", `Budget: ${C.budget}. E niente regali riciclati, ${NAME()}. Lo so sempre.`])];
+      if (g.found === g.total) {
+        G.masterBall = true;
+        return [
+          "HO HO HO! Li hai trovati TUTTI! Sei un vero Allenatore di Natale.",
+          `Tieni, ${NAME()}: una MASTER BALL. È una Safari Ball dipinta d'oro, ma funziona. Fidati.`,
+          "Usala sul Pokémon coi dati corrotti: lo cattura al primo colpo."
+        ];
+      }
+      if (!G.talked.santa) {
+        G.talked.santa = true;
+        return [
+          "HO HO HO! Quest'anno niente slitta: i regali ve li consegnate da soli. Io supervisiono.",
+          `Però ho perso ${g.total} REGALI per la Zona Safari... Se li trovi tutti, ho qualcosa per te.`,
+          "Uno è finito in mezzo al lago. Sul ghiaccio si scivola: pensa bene da dove partire."
+        ];
+      }
+      return [`Regali trovati: ${g.found} su ${g.total}. ${g.found ? "Continua così!" : "Guarda negli angoli, dietro le case, nel recinto..."}`];
+    },
     rival: () => G.talked.rival ? [pick(["Ancora in giro? Il mio l'ho già catturato al primo lancio.", "Ti ho visto lanciare le BALL. Imbarazzante."])] : (G.talked.rival = true, [
       `Ehi, ${NAME()}! Puzzi di regalo dell'ultimo minuto!`,
       "Io il mio Pokémon l'ho già catturato. Ci vediamo sotto l'albero... se ci arrivi!"
@@ -265,7 +311,6 @@
     "D:4,4": () => ["La porta del laboratorio è chiusa.", "Un biglietto: \"Sono qui fuori. — Prof. OAK\""],
     "D:11,10": () => ["È chiuso a chiave.", "Da dentro arriva un profumo di panettone. Qualcuno ha iniziato in anticipo."],
     W: () => ["È un pupazzo di neve.", "...Ti ha appena fatto l'occhiolino?"],
-    "~": () => ["Un lago ghiacciato. Un cartellino: \"VIETATO PATTINARE SENZA CASCO\"."],
     X: () => ["L'abete di Natale. Sotto non c'è ancora nessun regalo.", "...Colpa tua?"]
   };
 
@@ -284,6 +329,7 @@
     Music.play("world");
     World.reset();
     G.threshold = rnd(C.stepsMin, C.stepsMax);
+    G.masterBall = false; G.gifts = 0; updateHud();
     World.start();
     await fadeIn();
     await worldSay(DIALOGUES.oak());
@@ -459,12 +505,14 @@
         ].slice(Math.min(sasso - 1, 2))));
       } else if (act === "ball") {
         if (balls <= 0) { await sayB("Non hai più SAFARI BALL! ...Scherzo, OAK te ne passa altre 10."); setBalls(10); continue; }
+        const useMaster = G.masterBall && glitch;
+        if (G.masterBall && !glitch) { await sayB(`Non sprecare la MASTER BALL su un ${name}! Usa una Safari Ball.`); }
         attempts++;
-        setBalls(balls - 1);
-        await sayB("Ferma il cursore al centro!", { hold: false });
-        const t = await timingBar();
-        await sayB(`${NAME()} ha lanciato una SAFARI BALL!${t === "perfect" ? " Lancio PERFETTO!" : t === "bad" ? " Lancio un po' storto..." : ""}`, { hold: false });
-        const ball = await throwThing("");
+        if (useMaster) G.masterBall = false; else setBalls(balls - 1);
+        await sayB(useMaster ? "La MASTER BALL brilla d'oro..." : "Ferma il cursore al centro!", { hold: false });
+        const t = useMaster ? "perfect" : await timingBar();
+        await sayB(`${NAME()} ha lanciato ${useMaster ? "la MASTER BALL" : "una SAFARI BALL"}!${useMaster ? "" : t === "perfect" ? " Lancio PERFETTO!" : t === "bad" ? " Lancio un po' storto..." : ""}`, { hold: false });
+        const ball = await throwThing(useMaster ? "master" : "");
         if (!glitch) {
           Sfx.breakout(); ball.className = "ball"; enemyShake();
           await sayB(`${name} ha respinto la BALL! Non è lui quello che cerchi...`);
@@ -473,7 +521,7 @@
         spriteWrap.classList.add("hidden-mon"); stopGlitch();
         await wait(350);
         ball.className = "ball land";
-        const chance = attempts >= 3 ? 1 : t === "perfect" ? 0.85 : t === "good" ? 0.5 : 0.2;
+        const chance = useMaster || attempts >= 3 ? 1 : t === "perfect" ? 0.85 : t === "good" ? 0.5 : 0.2;
         const succeed = Math.random() < chance;
         const shakes = succeed ? 3 : rnd(1, 2);
         for (let i = 0; i < shakes; i++) {
@@ -489,8 +537,9 @@
           continue;
         }
         ball.classList.add("caught");
+        const fl = $("#flash"); fl.classList.add("once"); setTimeout(() => fl.classList.remove("once"), 400);
         Music.stop(); Sfx.catchJingle();
-        await sayB(`Gotcha! ??????? è stato catturato!`);
+        await sayB(`Gotcha! ??????? è stato catturato!${useMaster ? " La MASTER BALL non sbaglia." : ""}`);
         await reveal();
         return;
       }
@@ -519,7 +568,7 @@
     await sayB(`${target}${G.payload.form ? ` (forma ${G.payload.form})` : ""} è nelle tue mani: dovrai fargli il REGALO!`);
     Sfx.dex();
     await sayB(`I dati di ${target} sono stati registrati nel POKÉDEX.`);
-    writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now() });
+    writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now(), gifts: World.gifts.found });
     G.save = loadSave();
     await fadeOut();
     Music.play("dex");
@@ -557,12 +606,13 @@
       }
       list.appendChild(li);
     });
-    $("#dex-count").textContent = `VISTI 6 · CATTURATI 1`;
+    const gifts = G.save && G.save.gifts != null ? G.save.gifts : World.gifts.found;
+    $("#dex-count").textContent = `CATTURATI 1/6 · 🎁 ${gifts}/5`;
     $("#dex-reset").onclick = () => {
       Sfx.blip();
       if (!confirm("Vuoi cancellare la partita e ricominciare da capo?")) return;
       localStorage.removeItem(C.saveKey);
-      G.save = null; G.payload = null; G.player = null; G.decoysSeen = 0; G.talked = {};
+      G.save = null; G.payload = null; G.player = null; G.decoysSeen = 0; G.talked = {}; G.masterBall = false; G.gifts = 0;
       balls = C.safariBalls;
       Music.stop();
       title();

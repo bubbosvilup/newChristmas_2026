@@ -19,8 +19,8 @@ window.World = (() => {
     "T...=....HHDH..GGG.T",
     "T.f.=====.=....GGG.T",
     "T...S...=.=..#####.T",
-    "T.GGGG..=.=..#...#.T",
-    "T.GGGG..===..#.W.#.T",
+    "T.GGGG..=.=..#.W.#.T",
+    "T.GGGG..===..#...#.T",
     "Ts......=....##.##.T",
     "T....f..=......s...T",
     "TTTTTTTTTTTTTTTTTTTT"
@@ -32,6 +32,17 @@ window.World = (() => {
     { x: 2, y: 2, w: 5, h: 3, type: "lab", door: [4, 4] },
     { x: 9, y: 8, w: 4, h: 3, type: "house", door: [11, 10] }
   ];
+
+  // regali nascosti (coordinate tile); vengono raccolti passandoci sopra
+  const GIFTS = [
+    { x: 10, y: 2 },  // in mezzo al lago: ci si arriva solo scivolando
+    { x: 3, y: 1 },   // dietro il laboratorio
+    { x: 18, y: 1 },  // angolo in alto a destra
+    { x: 14, y: 13 }, // nel recinto del pupazzo
+    { x: 2, y: 16 }   // angolo in basso a sinistra
+  ];
+  let found = new Set();
+  const flakes = Array.from({ length: 36 }, (_, i) => ({ x: Math.random() * 160, y: Math.random() * 160, v: 0.25 + Math.random() * 0.45, w: i % 3 }));
 
   const NPCS = [
     { id: "oak", x: 5, y: 5, sprite: () => Pix.OAK, face: "left", turns: false },
@@ -50,7 +61,7 @@ window.World = (() => {
 
   const tileAt = (x, y) => (MAP[y] && MAP[y][x]) || "T";
   const npcAt = (x, y) => NPCS.find((n) => n.x === x && n.y === y);
-  const blocked = (x, y) => "TAHDX~#WS".includes(tileAt(x, y)) || !!npcAt(x, y);
+  const blocked = (x, y) => "TAHDX#WS".includes(tileAt(x, y)) || !!npcAt(x, y);
 
   // ---------- tiles ----------
   const GROUND = "#88d068", GROUND2 = "#78c058", DARK = "#285828", LEAF = "#48a048", LEAF2 = "#68c858",
@@ -131,6 +142,7 @@ window.World = (() => {
         cx.fillStyle = "#a07048"; cx.fillRect(x + 2, y + 3, 3, 12); cx.fillRect(x + 11, y + 3, 3, 12);
         cx.fillStyle = "#202030"; cx.fillRect(x + 2, y + 2, 3, 1); cx.fillRect(x + 11, y + 2, 3, 1);
         cx.fillStyle = SNOW; cx.fillRect(x + 2, y + 1, 3, 1); cx.fillRect(x + 11, y + 1, 3, 1);
+        drawLights(x + 3, y + 5, 2, frame * 20 + tx, 9);
         break;
       case "W":
         cx.fillStyle = "#202030"; cx.fillRect(x + 3, y + 7, 10, 9); cx.fillRect(x + 5, y + 1, 6, 7);
@@ -181,11 +193,40 @@ window.World = (() => {
       cx.fillStyle = "#f8e048"; cx.fillRect(dx + 10, dy + 9, 1, 1);
       if (b.type === "house") { cx.fillStyle = "#48a048"; cx.fillRect(dx + 6, dy + 3, 4, 3); cx.fillStyle = "#d83838"; cx.fillRect(dx + 7, dy + 4, 2, 1); }
     }
+    // filo di lucine sotto la gronda
+    drawLights(x + 1, y + roofH, Math.floor((w - 2) / 5), S.frame);
+    // ghirlanda sulla porta della casa
+    if (b.type === "house" && b.door) {
+      const dx = b.door[0] * T, dy = b.door[1] * T;
+      cx.fillStyle = "#48a048"; cx.fillRect(dx + 5, dy + 4, 6, 1); cx.fillRect(dx + 5, dy + 8, 6, 1); cx.fillRect(dx + 4, dy + 5, 1, 3); cx.fillRect(dx + 11, dy + 5, 1, 3);
+      cx.fillStyle = "#d83838"; cx.fillRect(dx + 7, dy + 8, 2, 1); cx.fillStyle = "#f8e048"; cx.fillRect(dx + 5, dy + 4, 1, 1); cx.fillRect(dx + 10, dy + 4, 1, 1);
+    }
     // insegna del laboratorio
     if (b.type === "lab") {
       cx.fillStyle = "#202030"; cx.fillRect(x + w - 26, y + roofH + 2, 22, 7);
       cx.fillStyle = "#f8f8f8"; cx.fillRect(x + w - 25, y + roofH + 3, 20, 5);
       cx.fillStyle = "#202030"; cx.fillRect(x + w - 23, y + roofH + 5, 3, 1); cx.fillRect(x + w - 19, y + roofH + 5, 3, 1); cx.fillRect(x + w - 15, y + roofH + 5, 3, 1); cx.fillRect(x + w - 11, y + roofH + 5, 5, 1);
+    }
+  }
+
+  function drawGift(x, y, frame) {
+    const bob = Math.floor(frame / 25) % 2;
+    const y0 = y + 4 - bob;
+    cx.fillStyle = "rgba(0,0,0,.18)"; cx.fillRect(x + 4, y + 13, 8, 2);
+    cx.fillStyle = "#202030"; cx.fillRect(x + 3, y0, 10, 9);
+    cx.fillStyle = "#d83838"; cx.fillRect(x + 4, y0 + 1, 8, 7);
+    cx.fillStyle = "#f8e048"; cx.fillRect(x + 7, y0 + 1, 2, 7); cx.fillRect(x + 4, y0 + 3, 8, 1);
+    cx.fillStyle = "#f8e048"; cx.fillRect(x + 5, y0 - 1, 2, 2); cx.fillRect(x + 9, y0 - 1, 2, 2);
+    cx.fillStyle = "#ffffff"; cx.fillRect(x + 5, y0 + 2, 1, 1);
+  }
+
+  const LIGHTS = ["#f85050", "#f8e048", "#58c8f8", "#58d858"];
+  function drawLights(x, y, n, frame, step = 5) {
+    const on = Math.floor(frame / 12) % 2;
+    for (let i = 0; i < n; i++) {
+      cx.fillStyle = (i % 2 === on) ? LIGHTS[i % 4] : "#f8f8f8";
+      cx.fillRect(x + i * step, y, 1, 1);
+      if (i % 2 === on) { cx.fillStyle = "rgba(255,255,255,.35)"; cx.fillRect(x + i * step - 1, y - 1, 3, 3); cx.fillStyle = LIGHTS[i % 4]; cx.fillRect(x + i * step, y, 1, 1); }
     }
   }
 
@@ -215,6 +256,7 @@ window.World = (() => {
         drawTile(ch, x * T, y * T, ch === "X" ? S.frame : anim, x, y);
       }
     BUILDINGS.forEach(drawBuilding);
+    GIFTS.forEach((g) => { if (!found.has(g)) drawGift(g.x * T, g.y * T, S.frame); });
     // personaggi ordinati per Y
     const actors = NPCS.map((n) => ({ y: n.y * T, draw: () => { const [sp, o] = npcSprite(n); Pix.draw(cx, sp, n.x * T, n.y * T - 2, o); } }));
     const [sp, opt] = spriteFor(S.facing, S.moving, S.frame);
@@ -227,6 +269,14 @@ window.World = (() => {
     } });
     actors.sort((a, b) => a.y - b.y).forEach((a) => a.draw());
     cx.restore();
+    // neve in primo piano (spazio schermo)
+    cx.fillStyle = "rgba(255,255,255,.9)";
+    flakes.forEach((f) => {
+      f.y += f.v; f.x += Math.sin((S.frame + f.x) / 40) * 0.2;
+      if (f.y > 160) { f.y = -2; f.x = Math.random() * 160; }
+      if (f.x < 0) f.x += 160; if (f.x > 160) f.x -= 160;
+      cx.fillRect(Math.round(f.x), Math.round(f.y), f.w === 0 ? 2 : 1, f.w === 0 ? 2 : 1);
+    });
   }
 
   function tryMove(dir) {
@@ -240,6 +290,14 @@ window.World = (() => {
 
   function arrived() {
     const t = tileAt(S.px, S.py);
+    const gi = GIFTS.findIndex((g) => g.x === S.px && g.y === S.py && !found.has(g));
+    if (gi >= 0) { found.add(GIFTS[gi]); hooks.onGift && hooks.onGift(found.size, GIFTS.length); return; }
+    if (t === "~") {
+      // sul ghiaccio si continua a scivolare finché non si incontra un ostacolo
+      const [dx, dy] = DIRS[S.facing];
+      if (!blocked(S.px + dx, S.py + dy)) { Sfx.slide(); tryMove(S.facing); return; }
+      Sfx.step(); return;
+    }
     if (t === "G") {
       S.stepsInGrass++;
       Sfx.rustle();
@@ -287,14 +345,15 @@ window.World = (() => {
       return { type: "npc", id: n.id };
     }
     const t = tileAt(x, y);
-    if ("SDW~X".includes(t)) return { type: "tile", tile: t, x, y };
+    if ("SDWX".includes(t)) return { type: "tile", tile: t, x, y };
     return null;
   }
 
   return {
     T, S,
     init(canvas, h) { cv = canvas; cx = cv.getContext("2d"); cx.imageSmoothingEnabled = false; hooks = h || {}; },
-    reset() { S.px = 4; S.py = 5; S.mx = S.my = 0; S.facing = "right"; S.moving = null; S.held = null; S.stepsInGrass = 0; NPCS[0].face = "left"; },
+    reset() { S.px = 4; S.py = 5; S.mx = S.my = 0; S.facing = "right"; S.moving = null; S.held = null; S.stepsInGrass = 0; NPCS[0].face = "left"; found = new Set(); },
+    get gifts() { return { found: found.size, total: GIFTS.length }; },
     start() { if (!S.raf) { S.lastT = performance.now(); S.raf = requestAnimationFrame(loop); } },
     stop() { cancelAnimationFrame(S.raf); S.raf = 0; },
     lock(v) { S.locked = v; if (v) S.held = null; },
