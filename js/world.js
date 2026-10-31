@@ -243,7 +243,7 @@ window.World = (() => {
   }
 
   function render() {
-    const ppx = S.px * T + S.mx, ppy = S.py * T + S.my;
+    const ppx = Math.round(S.px * T + S.mx), ppy = Math.round(S.py * T + S.my); // interi: niente pixel sfumati durante il passo
     S.cam.x = Math.max(0, Math.min(MW * T - VW * T, ppx - (VW * T) / 2 + 8));
     S.cam.y = Math.max(0, Math.min(MH * T - VH * T, ppy - (VH * T) / 2 + 8));
     cx.save();
