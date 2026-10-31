@@ -375,9 +375,29 @@
   let glitchTimer = 0, sliceEls = [];
   let balls = C.safariBalls;
 
+  // Misura il margine trasparente sotto il disegno e lo compensa, così i piedi toccano la piattaforma.
+  function groundSprite(src) {
+    spriteWrap.style.setProperty("--pad", "0%");
+    const probe = new Image();
+    probe.crossOrigin = "anonymous";
+    probe.onload = () => {
+      try {
+        const c = document.createElement("canvas"); c.width = probe.width; c.height = probe.height;
+        const x = c.getContext("2d"); x.drawImage(probe, 0, 0);
+        const d = x.getImageData(0, 0, c.width, c.height).data;
+        let bottom = c.height - 1;
+        outer: for (; bottom >= 0; bottom--) for (let i = 0; i < c.width; i++) if (d[(bottom * c.width + i) * 4 + 3] > 40) break outer;
+        const pad = (c.height - 1 - bottom) / c.height * 100;
+        spriteWrap.style.setProperty("--pad", pad.toFixed(1) + "%");
+      } catch { /* immagine senza CORS: lasciamo com'è */ }
+    };
+    probe.src = src;
+  }
+
   function buildEnemySprite(src, glitched) {
     sliceEls.forEach((e) => e.remove()); sliceEls = [];
     spriteWrap.querySelectorAll("img").forEach((e) => e.remove());
+    groundSprite(src);
     const img = document.createElement("img"); img.src = src; img.alt = "";
     spriteWrap.insertBefore(img, noiseCv);
     spriteWrap.classList.remove("revealed", "hidden-mon", "shadow", "pokeapi");
@@ -397,7 +417,7 @@
   function startGlitch(intensity) {
     stopGlitch();
     glitchTimer = setInterval(() => {
-      sliceEls.forEach((s) => { s.style.transform = `translateX(${Math.random() < 0.35 * intensity ? rnd(-10, 10) * intensity : 0}px)`; });
+      sliceEls.forEach((s) => { s.style.setProperty("--jx", (Math.random() < 0.35 * intensity ? rnd(-10, 10) * intensity : 0) + "px"); });
       ncx.clearRect(0, 0, 96, 96);
       for (let i = 0; i < Math.floor(14 * intensity); i++) {
         ncx.fillStyle = Math.random() < 0.5 ? "#000" : (Math.random() < 0.5 ? "#888" : "#fff");

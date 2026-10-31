@@ -4,7 +4,7 @@ window.Pix = (() => {
   const PAL = {
     k: "#202030", r: "#d83838", s: "#f8d0a0", S: "#d8a070", b: "#3058c0", w: "#f8f8f8", W: "#c8c8d8",
     h: "#503820", g: "#687080", G: "#c8c8d0", y: "#f8e048", e: "#f8f8f8", p: "#e06060", t: "#30a080",
-    o: "#f09040", c: "#c82838", v: "#8040a0", n: "#f8b060", R: "#a82020", B: "#203c90"
+    o: "#f09040", c: "#c82838", v: "#8040a0", n: "#f8b060", R: "#a82020", B: "#203c90", d: "#3a2a28"
   };
 
   // ---- giocatore (16x16, 4 direzioni): testa tonda, visiera, giacca con ombre ----
@@ -121,34 +121,49 @@ window.Pix = (() => {
   ];
   // ---- allenatore di spalle (battaglia, 24x25) ----
   const TRAINER_BACK = [
-    ".........kkkkkk.........",
-    ".......kkrrrrrrkk.......",
-    "......krrrrrrrrrrk......",
-    ".....krrrrrrrrrrrrk.....",
-    ".....krrrrrrrrrrrrk.....",
-    ".....kRRRRRRRRRRRRk.....",
-    "....kkkkkkkkkkkkkkkk....",
-    "......khhhhhhhhhhk......",
-    "......khhhhhhhhhhk......",
-    ".......khhhhhhhhk.......",
-    "........kssssssk........",
-    "........kssssssk........",
-    ".....kkkkbbbbbbkkkk.....",
-    "....kbbbbbbbbbbbbbbk....",
-    "...kbBbbbbbbbbbbbbBbk...",
-    "...kbBkbbbbbbbbbbkBbk...",
-    "...kbBkbbbbbbbbbbkBbk...",
-    "...ksskbbbbbbbbbbkssk...",
-    "...kssk.bbbbbbbb.kssk...",
-    "...kkkk.kbbbbbbk.kkkk...",
-    "........kggggggk........",
-    "........kggggggk........",
-    "........kggkkggk........",
-    "........kggk.kggk.......",
-    "........kkkk.kkkk......."
+    "............kkkkkkkk............",
+    "..........kkrrrrrrrrkk..........",
+    ".........krrrrrrrrrrrrk.........",
+    "........krrrrrrrrrrrrrrk........",
+    ".......krrrrrrrrrrrrrrrrk.......",
+    ".......krrrrrrwwwwrrrrrrk.......",
+    ".......kRRRRRRRRRRRRRRRRk.......",
+    "......kkkkkkkkkkkkkkkkkkkk......",
+    "......kwwwwwwwwwwwwwwwwwwk......",
+    ".......khhhhhhhhhhhhhhhhk.......",
+    ".......khhhhhhhhhhhhhhhhk.......",
+    "........khhhhhhhhhhhhhhk........",
+    ".........kkhhhhhhhhhhkk.........",
+    "...........kssssssssk...........",
+    "...........kssssssssk...........",
+    ".........kkkkSSSSSSkkkk.........",
+    ".....kkbbbbkkwwwwwwkkbbbbkk.....",
+    ".....kbbbbbkwwwwwwwwkbbbbbk.....",
+    "....kbbbbbbkwwwwwwwwkbbbbbbk....",
+    "....kbbBbbbkkwwwwwwkkbbbBbbk....",
+    "....kbbBbbbbkkkkkkkkbbbbBbbk....",
+    "...kbbbBkbbbrrrrrrrrbbbkBbbbk...",
+    "...kbbbBkbbbrrrrrrrrbbbkBbbbk...",
+    "...kbbbBkbbbbbbbbbbbbbbkBbbbk...",
+    "...kbbbBkbbbbbbbbbbbbbbkBbbbk...",
+    "...kbbbbkbbbbbbbbbbbbbbkbbbbk...",
+    "...kssssk.bbbbbbbbbbbb.kssssk...",
+    "...kssssk.bbbbbbbbbbbb.kssssk...",
+    "...kkkkkk.kBBBBBBBBBBk.kkkkkk...",
+    "..........kggggggggggk..........",
+    "..........kggggggggggk..........",
+    "..........kggggggggggk..........",
+    "..........kggggkkggggk..........",
+    ".........kggggk.kggggk..........",
+    ".........kggggk.kggggk..........",
+    ".........kggggk.kggggk..........",
+    ".........kkggggk.kggggkk........",
+    ".........kdddddk.kdddddk........",
+    ".........kdddddk.kdddddk........",
+    ".........kkkkkkk.kkkkkkk........"
   ];
   [PLAYER_DOWN, PLAYER_UP, PLAYER_SIDE, OAK, SANTA, RIVAL].forEach((sp, i) => sp.forEach((r, j) => { if (r.length !== 16) throw new Error("sprite " + i + " riga " + j); }));
-  TRAINER_BACK.forEach((r, j) => { if (r.length !== 24) throw new Error("trainer riga " + j); });
+  TRAINER_BACK.forEach((r, j) => { if (r.length !== 32) throw new Error("trainer riga " + j); });
 
   function draw(ctx, sp, x, y, { frame = 0, flip = false, pal = PAL } = {}) {
     for (let r = 0; r < sp.length; r++) {

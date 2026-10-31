@@ -223,7 +223,7 @@ body {
   box-shadow: inset 0 -.25em 0 rgba(0,0,0,.12);
 }
 .sprite-wrap {
-  position: absolute; right: 1em; bottom: 1em;
+  position: absolute; right: 1em; bottom: 1.2em;
   width: 11.5em; height: 11.5em;
   display: grid; place-items: end center;
   transition: transform .35s, opacity .2s;
@@ -232,6 +232,8 @@ body {
 .sprite-wrap img, .sprite-wrap .slice {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; image-rendering: auto;
+  transform-origin: 50% 100%;
+  transform: translate(var(--jx, 0px), var(--pad, 0%)) scale(var(--s, 1));
 }
 .sprite-wrap.hidden-mon { opacity: 0; transform: scale(0); }
 .sprite-wrap.shadow img { filter: brightness(0) contrast(2); }
@@ -252,7 +254,7 @@ body {
   background: linear-gradient(#e33 0 45%, #222 45% 58%, #fff 58%); border: .1em solid #222; position: relative;
 }
 .ball-ico::after { content: ''; position: absolute; left: 50%; top: 50%; width: .35em; height: .35em; transform: translate(-50%,-50%); background: #fff; border: .08em solid #222; border-radius: 50%; }
-.trainer { position: absolute; left: 1.2em; bottom: .3em; width: 7.5em; height: 7.8em; image-rendering: pixelated; filter: drop-shadow(0 .3em 0 rgba(0,0,0,.15)); }
+.trainer { position: absolute; left: 1.4em; bottom: .4em; width: 8em; height: 10em; image-rendering: pixelated; filter: drop-shadow(0 .3em 0 rgba(0,0,0,.15)); }
 .ball {
   position: absolute; left: 3.8em; top: 58%;
   width: 1.7em; height: 1.7em; border-radius: 50%;
@@ -478,7 +480,7 @@ body {
 .dex-msg { display: none; position: absolute; left: 1.2em; right: 1.2em; bottom: 2.6em; background: #f8f8f0; border: .25em solid #303040; border-radius: .4em; padding: .7em; font-size: .62em; line-height: 1.5; z-index: 5; }
 .dex-msg.on { display: block; }
 .card-form { font-size: .8em; color: #6a4a4a; margin-bottom: .3em; }
-.sprite-wrap.pokeapi img, .sprite-wrap.pokeapi .slice { transform: scale(1.55); transform-origin: 50% 92%; }
+.sprite-wrap.pokeapi { --s: 1.5; }
 .dex-list li { padding: .5em .8em; font-size: .78em; gap: .7em; }
 .dex-list li img { width: 3.2em; height: 3.2em; }
 
