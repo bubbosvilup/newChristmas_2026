@@ -572,3 +572,28 @@ body {
 .tcard-seen img { width: 3em; height: 3em; image-rendering: pixelated; background: #e8f0e0; border-radius: .3em; }
 .tcard-seen i { font-size: .8em; color: #6a6a7a; }
 .dex-foot span { flex: 1; }
+
+/* ---------- PROLOGO ---------- */
+#scr-story { background: linear-gradient(#0b1030 0%, #1b2a6a 55%, #3a5ab0 100%); overflow: hidden; }
+#scr-story .snow { opacity: .7; }
+.story-art { position: absolute; inset: 0 0 34% 0; display: grid; place-items: center; }
+.town-sign {
+  display: none; flex-direction: column; align-items: center; gap: .3em;
+  background: #a07048; border: .3em solid #503018; border-radius: .3em; padding: 1em 1.4em;
+  color: #fff4d8; font-size: .9em; text-shadow: .1em .1em 0 #503018; box-shadow: .3em .3em 0 rgba(0,0,0,.35);
+  animation: fadeup .6s both;
+}
+.town-sign::after { content: ''; position: absolute; left: 50%; bottom: -2.2em; width: .8em; height: 2.2em; background: #805030; transform: translateX(-50%); border: .15em solid #503018; }
+.town-sign { position: relative; }
+.scene-town .town-sign { display: flex; }
+.story-dex { display: none; position: relative; width: 92%; padding: .8em .4em; background: rgba(28,36,48,.85); border: .25em solid #c82838; border-radius: .5em; animation: fadeup .6s both; }
+.scene-dex .story-dex, .scene-glitch .story-dex { display: block; }
+.story-avatars { display: flex; justify-content: space-around; align-items: flex-end; }
+.story-avatars img { width: 15%; aspect-ratio: 1; object-fit: contain; filter: brightness(0) opacity(.9); transition: filter .4s; }
+.scene-dex .story-avatars img { filter: none; animation: fadeup .5s both; }
+.story-avatars img:nth-child(2) { animation-delay: .1s; } .story-avatars img:nth-child(3) { animation-delay: .2s; } .story-avatars img:nth-child(4) { animation-delay: .3s; } .story-avatars img:nth-child(5) { animation-delay: .4s; } .story-avatars img:nth-child(6) { animation-delay: .5s; }
+.story-avatars img.corrupt { filter: brightness(0) contrast(2); }
+#story-noise { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; opacity: 0; pointer-events: none; }
+.scene-glitch #story-noise { opacity: .9; }
+.scene-glitch .story-dex { border-color: #888; animation: shake .3s infinite; }
+.story-box { height: 32%; font-size: .78em; background: #f8f8f0; }

@@ -1,7 +1,10 @@
 # Babbo Natale Segreto · Versione Glitch
 
-Mini-gioco in stile Pokémon (Game Boy) per sorteggiare i regali di Natale tra 6 persone.
-Il Prof. Oak ti accoglie, scegli chi sei, poi esplori la Zona Safari innevata (lago ghiacciato, abete con le luci,
+Mini-gioco in stile Pokémon (Game Boy) per sorteggiare i regali di Natale tra 6 amici di Barberino di Mugello.
+La storia: tanti Natali fa sei amici fecero un patto (un regalo segreto a testa), il Prof. Oak li registrò in un
+Pokédex speciale che ogni anno decideva gli accoppiamenti... e quest'anno il Pokédex si è corrotto. L'unico modo
+per ricostruirlo è tornare nell'erba alta e ricatturare, uno per uno, i propri amici.
+Dopo il prologo il Prof. Oak ti accoglie, scegli chi sei, poi esplori la Zona Safari innevata (lago ghiacciato, abete con le luci,
 Babbo Natale, un rivale insopportabile). Nell'erba alta incontri qualche Pokémon normale e poi **???????**, un
 Pokémon dai dati corrotti: lo catturi con le Safari Ball (lancio a tempo) e nel Pokédex scopri a chi devi fare il
 regalo. L'esito sembra casuale ma è deciso in anticipo.

@@ -46,7 +46,7 @@
     $("#scr-" + id).classList.add("on");
     G.scr = id;
     dpad.classList.toggle("off", id !== "world");
-    abBtns.classList.toggle("off", !["world", "battle", "title", "intro", "dex", "card", "tcard"].includes(id));
+    abBtns.classList.toggle("off", !["world", "battle", "title", "intro", "story", "dex", "card", "tcard"].includes(id));
   }
   function fitFont() { screen.style.fontSize = (screen.clientWidth / 32) + "px"; }
   new ResizeObserver(fitFont).observe(screen);
@@ -129,7 +129,7 @@
         dex(true);
       } else {
         Music.play("title");
-        intro();
+        prologue();
       }
     };
     const offA = onA(go);
@@ -156,15 +156,67 @@
   }
   function oakStop() { clearInterval(oakAnim); oakAnim = 0; Pix.oakPortrait(portrait); }
 
+  // ---------- prologo: la storia dei sei ----------
+  const sayStoryRaw = makeDialog($("#story-box"), $("#stext"), $("#scursor"));
+  const sayStory = (text) => sayStoryRaw(text, { speed: 34 });
+  let storyNoise = 0;
+  function storyGlitch(on) {
+    const cv = $("#story-noise"), x = cv.getContext("2d");
+    clearInterval(storyNoise); storyNoise = 0; x.clearRect(0, 0, cv.width, cv.height);
+    if (!on) { $$("#story-avatars img").forEach((i) => i.classList.remove("corrupt")); return; }
+    $$("#story-avatars img").forEach((i) => i.classList.add("corrupt"));
+    storyNoise = setInterval(() => {
+      x.clearRect(0, 0, cv.width, cv.height);
+      for (let i = 0; i < 40; i++) {
+        x.fillStyle = Math.random() < 0.5 ? "#000" : (Math.random() < 0.5 ? "#888" : "#fff");
+        x.globalAlpha = 0.4 + Math.random() * 0.6;
+        x.fillRect(rnd(0, cv.width - 8), rnd(0, cv.height - 4), rnd(3, 18), rnd(1, 5));
+      }
+      x.globalAlpha = 1;
+      $$("#story-avatars img").forEach((i) => { i.style.transform = Math.random() < 0.3 ? `translate(${rnd(-4, 4)}px, ${rnd(-2, 2)}px)` : ""; });
+    }, 100);
+  }
+  function storyScene(name) {
+    const s = $("#scr-story");
+    s.classList.remove("scene-town", "scene-dex", "scene-glitch");
+    s.classList.add("scene-" + name);
+  }
+
+  async function prologue() {
+    show("story");
+    const av = $("#story-avatars");
+    av.innerHTML = C.avatars.map((f) => `<img src="assets/sprites/${f}" alt="">`).join("");
+    storyGlitch(false);
+    storyScene("town");
+    await wait(600);
+    await sayStory("BARBERINO DI MUGELLO. Un paese tra le colline, dove d'inverno la nebbia sale dal lago e le luci di Natale si accendono presto.");
+    await sayStory("Qui, tanti Natali fa, sei amici fecero un patto: ogni anno un regalo segreto. Uno a testa. Nessuno sa da chi.");
+    await sayStory("Erano ragazzi, allora. Oggi hanno trentacinque, trentasei anni. Lavoro, case, impegni. Qualcuno abita un po' più lontano.");
+    await sayStory("Ci si vede meno di una volta. Ma ogni dicembre, puntuale, il patto torna a bussare.");
+    storyScene("dex");
+    Sfx.dex();
+    await sayStory("Per non perderne memoria, il Prof. OAK costruì un POKÉDEX speciale: dentro c'erano tutti e sei, registrati come Pokémon rarissimi.");
+    await sayStory("Ogni Natale, il Pokédex decideva gli accoppiamenti. Nessun cappello, nessun bigliettino: solo dati, e un po' di magia.");
+    storyScene("glitch"); storyGlitch(true); Sfx.glitch();
+    await sayStory("Ma quest'anno qualcosa è andato storto. Un errore, un bug... forse troppa neve nei circuiti.");
+    Sfx.glitch();
+    await sayStory("I DATI SI SONO CORROTTI. Sei amici, sei ???????. Il Pokédex non ricorda più chi è chi.");
+    await sayStory("C'è un solo modo per ricostruirlo: tornare nell'erba alta. E catturare di nuovo, uno per uno, i propri amici.");
+    storyGlitch(false);
+    await fadeOut();
+    $("#fade").classList.remove("on");
+    intro();
+  }
+
   async function intro() {
     show("intro");
     $("#scr-intro").classList.remove("named");
     oakStart();
     await wait(700);
-    await sayIntro("Salve! Benvenuto nel mondo dei POKÉMON!");
-    await sayIntro("Il mio nome è OAK. La gente mi chiama il PROFESSORE dei Pokémon.");
-    await sayIntro("Questo mondo è abitato da creature chiamate POKÉMON. Alcune... somigliano stranamente ai tuoi amici.");
-    await sayIntro("Quest'anno il BABBO NATALE SEGRETO non si estrae da un cappello. Si CATTURA.");
+    await sayIntro("Salve! Benvenuto nel mondo dei POKÉMON... o quel che ne resta.");
+    await sayIntro("Sono il Prof. OAK. Ti stavo aspettando. Il Pokédex dei sei è nelle vostre mani: un pezzo a testa.");
+    await sayIntro("Tu dovrai catturare UN amico: quello che i dati, pur corrotti, ti hanno assegnato.");
+    await sayIntro("E ricorda la regola del patto: chi catturi, è la persona a cui farai il REGALO.");
     await sayIntro("Ma prima di tutto, dimmi: tu chi sei?");
     oakStop();
     login();
@@ -174,9 +226,10 @@
     show("intro");
     $("#scr-intro").classList.add("named");
     oakStart();
-    await sayIntro(`${G.player.toUpperCase()}! Certo, ora ricordo. Il tuo PIN è corretto.`);
-    await sayIntro("Là fuori, nell'erba alta della ZONA SAFARI, si nasconde la persona a cui farai il regalo.");
-    await sayIntro("I suoi dati sono CORROTTI: la riconoscerai solo dopo averla catturata. Il tuo viaggio comincia ora!");
+    await sayIntro(`${G.player.toUpperCase()}! Certo. Nel Pokédex ci sei dal primo anno: il PIN è corretto.`);
+    await sayIntro("La ZONA SAFARI del Mugello è qui fuori: erba alta, un lago ghiacciato, Babbo Natale in persona...");
+    await sayIntro("...e un tipo insopportabile che in dieci anni non abbiamo mai invitato. Lascia stare, o sfidalo, fai te.");
+    await sayIntro("Vai. E a Natale, sotto l'albero, ricostruiamo tutto. Insieme.");
     oakStop();
     Music.stop();
     await fadeOut();
@@ -311,8 +364,9 @@
       ])
     ] : (G.talked.oak = true, [
       `Ecco, ${NAME()}: prendi queste 30 SAFARI BALL. Qui non si combatte, si cattura e basta.`,
-      "Cerca nell'ERBA ALTA. E se trovi un Pokémon che sembra... rotto, non avere paura. È lui.",
-      "Vai! E ricorda: il regalo NON si ricicla."
+      "Nell'ERBA ALTA troverai Pokémon normali: lasciali andare. Quello che cerchi ha i dati ROTTI, lo riconoscerai subito.",
+      "Quando lo catturi, il suo pezzo di Pokédex torna al suo posto. E tu saprai a chi fare il regalo.",
+      "Vai! E ricorda la regola di sempre: il regalo NON si ricicla."
     ]),
     santa: () => {
       const g = World.gifts;
@@ -328,7 +382,8 @@
       if (!G.talked.santa) {
         G.talked.santa = true;
         return [
-          "HO HO HO! Quest'anno niente slitta: i regali ve li consegnate da soli. Io supervisiono.",
+          "HO HO HO! Trentacinque anni e ancora mi credete. Siete i miei preferiti di tutto il Mugello.",
+          "Quest'anno niente slitta: i regali ve li consegnate da soli. Io supervisiono dal bosco.",
           `Però ho perso ${g.total} REGALI per la Zona Safari... Se li trovi tutti, ho qualcosa per te.`,
           "Uno è finito in mezzo al lago. Sul ghiaccio si scivola: pensa bene da dove partire."
         ];
@@ -336,18 +391,18 @@
       return [`Regali trovati: ${g.found} su ${g.total}. ${g.found ? "Continua così!" : "Guarda negli angoli, dietro le case, nel recinto..."}`];
     },
     rival: () => {
-      if (G.rivalBeaten) return [pick(["Mi hai battuto a palle di neve. Non lo dirò a nessuno. Tu nemmeno.", "Il mio Pokémon l'ho già catturato. Ci vediamo sotto l'albero!"])];
-      if (G.talked.rival) return ["Rivincita? Palle di neve, chi becca l'altro 3 volte vince!"];
+      if (G.rivalBeaten) return [pick(["Mi hai battuto a palle di neve. Non lo dirò a nessuno. Tu nemmeno.", "...Magari l'anno prossimo mi invitate? No? Ok. Smell ya later."])];
+      if (G.talked.rival) return ["Rivincita? Palle di neve, cinque cuori a testa. Stavolta non ti risparmio."];
       G.talked.rival = true;
       return [
-        `Ehi, ${NAME()}! Puzzi di regalo dell'ultimo minuto!`,
-        "Io il mio Pokémon l'ho già catturato. Ma prima di andare... ti sfido a PALLE DI NEVE!",
-        "Chi becca l'altro 3 volte vince. Preparati!"
+        `Ehi, ${NAME()}! Sono DIECI ANNI che aspetto un invito al vostro Babbo Natale Segreto!`,
+        "Vi conosco tutti e sei. So anche cosa vi regalate. Calzini, quasi sempre.",
+        "Visto che l'invito non arriva, mi vendico: ti sfido a PALLE DI NEVE! Cinque cuori a testa. Preparati!"
       ];
     },
-    S: () => ["ZONA SAFARI", "▸ Erba alta a nord e a sud. ▸ Segnalati DATI CORROTTI nella zona."],
+    S: () => ["ZONA SAFARI DEL MUGELLO", "▸ Erba alta a nord e a sud. ▸ Lago ghiacciato: si scivola. ▸ Segnalati DATI CORROTTI nella zona."],
     "D:4,4": () => ["La porta del laboratorio è chiusa.", "Un biglietto: \"Sono qui fuori. — Prof. OAK\""],
-    "D:11,10": () => ["È chiuso a chiave.", "Da dentro arriva un profumo di panettone. Qualcuno ha iniziato in anticipo."],
+    "D:11,10": () => ["È chiuso a chiave. Sulla porta un foglio: \"CENA DI NATALE DEI SEI — data da definire, come ogni anno\".", "Da dentro arriva un profumo di panettone. Qualcuno ha iniziato in anticipo."],
     W: () => ["È un pupazzo di neve.", "...Ti ha appena fatto l'occhiolino?"],
     X: () => ["L'abete di Natale. Sotto non c'è ancora nessun regalo.", "...Colpa tua?"]
   };
@@ -504,9 +559,10 @@
   }
 
   // barra di tempismo: il giocatore ferma il cursore. Ritorna "perfect" | "good" | "bad"
-  async function timingBar(label = "PREMI A") {
+  async function timingBar(label = "PREMI A", speed = 0.85) {
     const bar = $("#throwbar"), cur = $("#throwcur");
     bar.querySelector(".throwlabel").textContent = label;
+    cur.style.animationDuration = speed + "s";
     bar.classList.add("on"); cur.style.animation = "none"; void cur.offsetWidth; cur.style.animation = "";
     await waitA();
     const b = bar.querySelector(".track").getBoundingClientRect(), c = cur.getBoundingClientRect();
@@ -638,50 +694,71 @@
     await wait(900);
     Sfx.cry(); enemyShake();
     await sayB("RIVALE ti sfida a PALLE DI NEVE!");
-    await sayB("Chi colpisce l'altro 3 volte vince. LANCIA con il tempismo giusto, e SCHIVA quando tocca a lui!");
-    let me = 3, him = 3, taunted = false, won = false, fled = false, round = 0;
-    const hearts = () => { $("#hearts").textContent = "♥".repeat(me) + "♡".repeat(3 - me); };
-    while (me > 0 && him > 0 && round++ < 6) {
+    await sayB("Cinque cuori a testa. LANCIA con il tempismo giusto, SCHIVA quando tocca a lui. Il PALLONE va preparato: vale doppio, ma ti scopre.");
+    const MAXHP = 5;
+    let me = MAXHP, him = MAXHP, taunted = false, won = false, fled = false, round = 0, charging = false, rivalBig = false;
+    const hearts = () => { $("#hearts").textContent = "♥".repeat(me) + "♡".repeat(MAXHP - me); };
+    hearts();
+    while (me > 0 && him > 0 && round++ < 10) {
       await sayB(`Cosa fa ${NAME()}?`, { hold: false });
       const act = await menu();
-      if (act === "fuga") { fled = true; await sayB("RIVALE: Scappi?! Lo sapevo!"); break; }
+      if (act === "fuga") { fled = true; await sayB("RIVALE: Scappi?! Dieci anni di attesa e scappi!"); break; }
       if (act === "taunt") {
         taunted = true;
-        await sayB(pick([`${NAME()}: "I tuoi capelli sembrano un Pokémon di tipo Fuoco."`, `${NAME()}: "Smell ya later... anzi no, ora."`, `${NAME()}: "Il tuo regalo l'anno scorso era un calzino. Singolo."`]));
-        await sayB("RIVALE è furioso! Il prossimo lancio sarà impreciso.");
+        await sayB(pick([`${NAME()}: "I tuoi capelli sembrano un Pokémon di tipo Fuoco."`, `${NAME()}: "Smell ya later... anzi no, ora."`, `${NAME()}: "Non ti abbiamo invitato per un motivo."`]));
+        await sayB("RIVALE è furioso! Il suo prossimo lancio sarà impreciso.");
+      } else if (act === "big" && !charging) {
+        charging = true;
+        await sayB(`${NAME()} raccoglie neve e prepara un PALLONE enorme... Attento: con le mani piene si schiva male!`);
       } else {
-        const big = act === "big";
-        await sayB(big ? "Stai preparando un PALLONE di neve... mira al centro!" : "Mira al centro!", { hold: false });
-        const tt = await timingBar("LANCIA!");
-        await sayB(`${NAME()} ha lanciato ${big ? "un PALLONE" : "una palla di neve"}!`, { hold: false });
+        const big = act === "big"; // pallone pronto dal turno scorso
+        await sayB(big ? "Il PALLONE è pronto. Mira al centro!" : "Mira al centro!", { hold: false });
+        const tt = await timingBar("LANCIA!", big ? 0.7 : 0.85);
+        await sayB(`${NAME()} ha lanciato ${big ? "il PALLONE" : "una palla di neve"}!`, { hold: false });
         await throwThing(big ? "snow big" : "snow"); $("#ball").className = "ball";
-        const hit = big ? tt === "perfect" : tt !== "bad";
-        if (hit) { him -= big ? 2 : 1; setHp(him / 3); Sfx.breakout(); enemyShake(); hpShake(); await sayB(big ? "COLPITO IN PIENO! Il PALLONE fa doppio danno!" : pick(["Colpito!", "In faccia! RIVALE sputa neve.", "Centro!"])); }
-        else await sayB(pick(["Mancato! RIVALE ride.", "La palla finisce sull'abete.", big ? "Il PALLONE si sbriciola a mezz'aria." : "Troppo lungo!"]));
+        let dmg = 0;
+        if (big) { dmg = tt === "perfect" ? 2 : tt === "good" ? 1 : 0; charging = false; }
+        else dmg = tt === "perfect" ? 1 : tt === "good" ? (Math.random() < 0.6 ? 1 : 0) : 0;
+        if (dmg) { him -= dmg; setHp(him / MAXHP); Sfx.breakout(); enemyShake(); hpShake(); await sayB(dmg === 2 ? "COLPITO IN PIENO! Il PALLONE fa doppio danno!" : pick(["Colpito!", "In faccia! RIVALE sputa neve.", "Centro!", big ? "Il PALLONE lo sfiora: un danno." : "Preso di striscio!"])); }
+        else await sayB(pick(["Mancato! RIVALE ride.", "La palla finisce sull'abete.", big ? "Il PALLONE ti scivola dalle mani e si sbriciola." : "Troppo lungo!"]));
         if (him <= 0) break;
       }
-      // turno del rivale
-      await sayB("RIVALE lancia! Premi A al momento giusto per SCHIVARE!", { hold: false });
-      const ball = $("#ball"); ball.className = "ball snow back"; Sfx.throwBall();
-      const d = await timingBar("SCHIVA!");
+      // turno del rivale: ogni tanto prepara un pallone, e con i round accelera
+      const speed = Math.max(0.5, 0.85 - round * 0.04);
+      if (rivalBig) {
+        await sayB("RIVALE scaglia il suo PALLONE! Serve una schivata PERFETTA!", { hold: false });
+      } else if (!taunted && round >= 2 && Math.random() < 0.3) {
+        rivalBig = true;
+        await sayB("RIVALE sta preparando un PALLONE... Ti guarda con un ghigno.");
+        continue;
+      } else {
+        await sayB("RIVALE lancia! Premi A al momento giusto per SCHIVARE!", { hold: false });
+      }
+      const ball = $("#ball"); ball.className = "ball snow back" + (rivalBig ? " big" : ""); Sfx.throwBall();
+      const d = await timingBar("SCHIVA!", rivalBig ? speed * 0.85 : speed);
       ball.className = "ball";
-      const dodged = taunted ? d !== "bad" || Math.random() < 0.5 : d !== "bad";
-      taunted = false;
-      if (dodged) await sayB(pick(["Schivata!", "La palla ti sfiora l'orecchio.", "RIVALE: \"Stai fermo!\""]));
-      else { me--; hearts(); playerShake(); Sfx.breakout(); await sayB(pick(["Preso in pieno!", "Neve nel colletto. Gelida.", "Ti ha beccato."])); }
+      let dodged;
+      if (taunted) dodged = d !== "bad" || Math.random() < 0.6;
+      else if (rivalBig) dodged = d === "perfect" || (d === "good" && Math.random() < 0.4);
+      else if (charging) dodged = d === "perfect" || (d === "good" && Math.random() < 0.5);
+      else dodged = d !== "bad";
+      const hitDmg = rivalBig ? 2 : 1;
+      taunted = false; rivalBig = false;
+      if (dodged) await sayB(pick(["Schivata!", "La palla ti sfiora l'orecchio.", "RIVALE: \"Stai fermo!\"", charging ? "Schivata, e il PALLONE è ancora intero!" : "Troppo lento, RIVALE!"]));
+      else { me = Math.max(0, me - hitDmg); hearts(); playerShake(); Sfx.breakout(); await sayB(hitDmg === 2 ? "Il PALLONE ti travolge! Due cuori in meno." : pick(["Preso in pieno!", "Neve nel colletto. Gelida.", charging ? "Con le mani piene non potevi schivare." : "Ti ha beccato."])); }
     }
     if (him <= 0) {
       won = true; G.rivalBeaten = true;
       Music.play("victory"); spriteWrap.classList.add("beaten");
       await sayB("RIVALE è sepolto dalla neve!");
-      await sayB("RIVALE: \"Ok, ok, hai vinto. Tieni: 5 SAFARI BALL. E non raccontarlo in giro.\"");
+      await sayB("RIVALE: \"Ok, ok, hai vinto. Tieni: 5 SAFARI BALL. E... salutami gli altri cinque.\"");
       balls += 5;
       award("neve");
       await sayB(`${NAME()} ha ricevuto 5 SAFARI BALL!`);
     } else if (!fled && me > 0) {
       await sayB("Pareggio! RIVALE: \"Ho le mani congelate. Rivincita quando vuoi.\"");
     } else if (!fled) {
-      await sayB("Sei sepolto dalla neve! RIVALE: \"Ritenta quando vuoi, campione.\"");
+      await sayB("Sei sepolto dalla neve! RIVALE: \"Dieci anni di allenamento. Ritenta quando vuoi, campione.\"");
     }
     // ripristino
     scr.classList.remove("duel"); spriteWrap.classList.remove("pixel", "beaten");
@@ -737,7 +814,9 @@
     await sayB(`??????? era in realtà... ${target}!`);
     await sayB(`${target}${G.payload.form ? ` (forma ${G.payload.form})` : ""} è nelle tue mani: dovrai fargli il REGALO!`);
     Sfx.dex();
-    await sayB(`I dati di ${target} sono stati registrati nel POKÉDEX.`);
+    await sayB(`I dati di ${target} sono stati registrati nel POKÉDEX. Un pezzo è tornato al suo posto.`);
+    await sayB("Quando tutti e sei avrete catturato, il Pokédex sarà di nuovo completo.");
+    await sayB("Ci vediamo sotto l'albero. A Barberino.");
     writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now(), gifts: World.gifts.found, badges: [...G.badges], stats: G.stats, rivalBeaten: G.rivalBeaten });
     G.save = loadSave();
     await fadeOut();
