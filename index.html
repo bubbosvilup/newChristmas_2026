@@ -127,7 +127,7 @@
             <div class="dex-sub"><span>ALLENATORE <b id="dex-trainer"></b></span><span id="dex-count" class="dex-count"></span></div>
             <ul id="dex-list" class="dex-list"></ul>
             <div class="dex-msg" id="dex-msg"></div>
-            <div class="dex-foot">▶ Tocca la voce catturata per i dettagli <button class="reset" id="dex-reset">⟲ NUOVA PARTITA</button></div>
+            <div class="dex-foot"><button class="reset" id="dex-tcard">CARTA</button> <span>▶ Tocca la voce catturata</span> <button class="reset" id="dex-reset">⟲ RESET</button></div>
           </div>
         </section>
 
@@ -154,6 +154,23 @@
           </div>
         </section>
 
+        <!-- CARTA ALLENATORE -->
+        <section class="scr" id="scr-tcard">
+          <div class="tcard">
+            <div class="tcard-head">CARTA ALLENATORE</div>
+            <div class="tcard-top">
+              <canvas id="tcard-sprite" width="16" height="16"></canvas>
+              <div><div class="tcard-name" id="tcard-name"></div><div class="tcard-sub">ZONA SAFARI · NATALE 2026</div></div>
+            </div>
+            <div class="tcard-badges" id="tcard-badges"></div>
+            <div class="tcard-stats" id="tcard-stats"></div>
+            <div class="tcard-label">POKÉMON VISTI</div>
+            <div class="tcard-seen" id="tcard-seen"></div>
+            <button class="btn" id="tcard-back">◀ INDIETRO</button>
+          </div>
+        </section>
+
+        <div id="toast"></div>
         <div id="flash"></div>
         <div id="wipe"></div>
         <div id="fade"></div>

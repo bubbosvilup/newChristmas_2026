@@ -17,7 +17,28 @@
   const dpad = $("#dpad");
   const abBtns = $(".ab");
 
-  const G = { scr: null, player: null, payload: null, save: null, decoysSeen: 0, threshold: 0, talked: {}, masterBall: false, gifts: 0 };
+  const G = { scr: null, player: null, payload: null, save: null, decoysSeen: 0, threshold: 0, talked: {}, masterBall: false, gifts: 0,
+    badges: new Set(), rivalBeaten: false, stats: { steps: 0, throws: 0, perfect: 0, seen: [], start: Date.now() } };
+
+  // ---------- medaglie ----------
+  const BADGES = [
+    { id: "ghiaccio", icon: "❄", name: "Ghiaccio", desc: "Regalo in mezzo al lago" },
+    { id: "regali", icon: "🎁", name: "Regali", desc: "Tutti i regali trovati" },
+    { id: "neve", icon: "⛄", name: "Neve", desc: "Rivale battuto a palle di neve" },
+    { id: "lancio", icon: "🎯", name: "Lancio", desc: "Un lancio PERFETTO" },
+    { id: "esploratore", icon: "🧭", name: "Esploratore", desc: "Hai parlato con tutti" }
+  ];
+  let toastT = 0;
+  function toast(text) {
+    const el = $("#toast"); el.textContent = text; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 2600);
+  }
+  function award(id) {
+    if (G.badges.has(id)) return;
+    G.badges.add(id); Sfx.gift();
+    const b = BADGES.find((x) => x.id === id);
+    toast(`${b.icon} Medaglia ${b.name.toUpperCase()} ottenuta!`);
+  }
 
   // ---------- UI base ----------
   function show(id) {
@@ -25,7 +46,7 @@
     $("#scr-" + id).classList.add("on");
     G.scr = id;
     dpad.classList.toggle("off", id !== "world");
-    abBtns.classList.toggle("off", !["world", "battle", "title", "intro"].includes(id));
+    abBtns.classList.toggle("off", !["world", "battle", "title", "intro", "dex", "card", "tcard"].includes(id));
   }
   function fitFont() { screen.style.fontSize = (screen.clientWidth / 32) + "px"; }
   new ResizeObserver(fitFont).observe(screen);
@@ -43,7 +64,11 @@
   function pressA() { const fn = aHandlers[aHandlers.length - 1]; if (fn) fn(); }
   function waitA() { return new Promise((res) => { const off = onA(() => { off(); res(); }); }); }
   $("#btn-a").addEventListener("click", pressA);
-  $("#btn-start").addEventListener("click", pressA);
+  $("#btn-start").addEventListener("click", () => {
+    if (G.scr === "world" && !World.locked && !World.isMoving) { Sfx.select(); openTCard("world"); }
+    else if (G.scr === "tcard") closeTCard();
+    else pressA();
+  });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " " || e.key === "z" || e.key === "Z") { e.preventDefault(); pressA(); }
   });
@@ -61,16 +86,20 @@
   let typing = false, skipType = false;
   function makeDialog(box, textEl, cursorEl) {
     box.addEventListener("click", () => { if (typing) skipType = true; else pressA(); });
+    let gen = 0;
     return async function say(text, { hold = true, speed = 26, voice = false } = {}) {
+      const my = ++gen; // se parte un'altra riga, questa si ferma
       cursorEl.classList.remove("on");
       textEl.textContent = "";
       typing = true; skipType = false;
       for (let i = 0; i < text.length; i++) {
+        if (my !== gen) return;
         if (skipType) { textEl.textContent = text; break; }
         textEl.textContent += text[i];
         if (i % 3 === 0 && text[i] !== " ") (voice ? Sfx.voice : Sfx.blip)();
         await wait(speed);
       }
+      if (my !== gen) return;
       typing = false;
       if (!hold) return;
       cursorEl.classList.add("on");
@@ -198,15 +227,15 @@
       if (code.length < LEN) { msg.textContent = "PIN di 6 cifre"; Sfx.deny(); return; }
       busy = true; msg.textContent = "Verifica...";
       const payload = await Vault.unlock(name, code);
-      busy = false;
       if (!payload) {
+        busy = false;
         code = ""; render(); msg.textContent = "PIN ERRATO!"; Sfx.deny();
         boxes.classList.remove("shake"); void boxes.offsetWidth; boxes.classList.add("shake");
         return;
       }
       G.payload = payload;
-      Sfx.unlock();
-      new Image().src = payload.sprite;
+      Sfx.unlock(); msg.textContent = "OK!";
+      const pre = new Image(); pre.crossOrigin = "anonymous"; pre.src = payload.sprite;
       await wait(400);
       introAfterPin();
     }
@@ -234,8 +263,11 @@
   }
 
   World.init($("#world"), {
-    async onGift(n, total) {
+    onStep() { G.stats.steps++; },
+    async onGift(n, total, gift) {
       Sfx.gift(); updateHud(); G.gifts = n;
+      if (gift && gift.x === 10 && gift.y === 2) award("ghiaccio");
+      if (n === total) award("regali");
       const hud = $("#gift-hud"); hud.classList.remove("pop"); void hud.offsetWidth; hud.classList.add("pop");
       if (n === total) await worldSay([`Hai trovato un REGALO! (${n}/${total})`, "Sono tutti! BABBO NATALE vorrà saperlo..."]);
       else await worldSay([`Hai trovato un REGALO! (${n}/${total})`]);
@@ -303,10 +335,16 @@
       }
       return [`Regali trovati: ${g.found} su ${g.total}. ${g.found ? "Continua così!" : "Guarda negli angoli, dietro le case, nel recinto..."}`];
     },
-    rival: () => G.talked.rival ? [pick(["Ancora in giro? Il mio l'ho già catturato al primo lancio.", "Ti ho visto lanciare le BALL. Imbarazzante."])] : (G.talked.rival = true, [
-      `Ehi, ${NAME()}! Puzzi di regalo dell'ultimo minuto!`,
-      "Io il mio Pokémon l'ho già catturato. Ci vediamo sotto l'albero... se ci arrivi!"
-    ]),
+    rival: () => {
+      if (G.rivalBeaten) return [pick(["Mi hai battuto a palle di neve. Non lo dirò a nessuno. Tu nemmeno.", "Il mio Pokémon l'ho già catturato. Ci vediamo sotto l'albero!"])];
+      if (G.talked.rival) return ["Rivincita? Palle di neve, chi becca l'altro 3 volte vince!"];
+      G.talked.rival = true;
+      return [
+        `Ehi, ${NAME()}! Puzzi di regalo dell'ultimo minuto!`,
+        "Io il mio Pokémon l'ho già catturato. Ma prima di andare... ti sfido a PALLE DI NEVE!",
+        "Chi becca l'altro 3 volte vince. Preparati!"
+      ];
+    },
     S: () => ["ZONA SAFARI", "▸ Erba alta a nord e a sud. ▸ Segnalati DATI CORROTTI nella zona."],
     "D:4,4": () => ["La porta del laboratorio è chiusa.", "Un biglietto: \"Sono qui fuori. — Prof. OAK\""],
     "D:11,10": () => ["È chiuso a chiave.", "Da dentro arriva un profumo di panettone. Qualcuno ha iniziato in anticipo."],
@@ -321,7 +359,14 @@
     let fn;
     if (hit.type === "npc") fn = DIALOGUES[hit.id];
     else fn = DIALOGUES[`${hit.tile}:${hit.x},${hit.y}`] || DIALOGUES[hit.tile];
-    if (fn) worldSay(fn());
+    if (!fn) return;
+    const lines = fn();
+    const duelAfter = hit.type === "npc" && hit.id === "rival" && !G.rivalBeaten;
+    worldSay(lines).then(() => {
+      if (["oak", "santa", "rival"].every((k) => G.talked[k]) && G.talked.S) award("esploratore");
+      if (duelAfter) encounter({ kind: "duel" });
+    });
+    if (hit.type === "tile" && hit.tile === "S") G.talked.S = true;
   }
 
   async function world() {
@@ -398,13 +443,13 @@
     sliceEls.forEach((e) => e.remove()); sliceEls = [];
     spriteWrap.querySelectorAll("img").forEach((e) => e.remove());
     groundSprite(src);
-    const img = document.createElement("img"); img.src = src; img.alt = "";
+    const img = document.createElement("img"); img.crossOrigin = "anonymous"; img.src = src; img.alt = "";
     spriteWrap.insertBefore(img, noiseCv);
     spriteWrap.classList.remove("revealed", "hidden-mon", "shadow", "pokeapi");
     if (/pokemon\/\d+\.png$/.test(src)) spriteWrap.classList.add("pokeapi");
     if (glitched) {
       for (let i = 0; i < 6; i++) {
-        const s = document.createElement("img"); s.src = src; s.className = "slice";
+        const s = document.createElement("img"); s.crossOrigin = "anonymous"; s.src = src; s.className = "slice";
         s.style.clipPath = `inset(${i * 16.6}% 0 ${100 - (i + 1) * 16.6}% 0)`;
         spriteWrap.insertBefore(s, noiseCv); sliceEls.push(s);
       }
@@ -459,8 +504,9 @@
   }
 
   // barra di tempismo: il giocatore ferma il cursore. Ritorna "perfect" | "good" | "bad"
-  async function timingBar() {
+  async function timingBar(label = "PREMI A") {
     const bar = $("#throwbar"), cur = $("#throwcur");
+    bar.querySelector(".throwlabel").textContent = label;
     bar.classList.add("on"); cur.style.animation = "none"; void cur.offsetWidth; cur.style.animation = "";
     await waitA();
     const b = bar.querySelector(".track").getBoundingClientRect(), c = cur.getBoundingClientRect();
@@ -477,9 +523,11 @@
   }
 
   async function battle(what) {
+    if (what.kind === "duel") return duel();
     show("battle");
     Music.play("battle");
     const glitch = what.kind === "glitch";
+    if (!glitch && !G.stats.seen.some((m) => m.id === what.mon.id)) G.stats.seen.push(what.mon);
     const name = glitch ? "???????" : what.mon.name.toUpperCase();
     $("#ename").textContent = name;
     $("#elvl").textContent = glitch ? "L??" : "L" + rnd(5, 12);
@@ -531,6 +579,7 @@
         if (useMaster) G.masterBall = false; else setBalls(balls - 1);
         await sayB(useMaster ? "La MASTER BALL brilla d'oro..." : "Ferma il cursore al centro!", { hold: false });
         const t = useMaster ? "perfect" : await timingBar();
+        G.stats.throws++; if (t === "perfect") { G.stats.perfect++; award("lancio"); }
         await sayB(`${NAME()} ha lanciato ${useMaster ? "la MASTER BALL" : "una SAFARI BALL"}!${useMaster ? "" : t === "perfect" ? " Lancio PERFETTO!" : t === "bad" ? " Lancio un po' storto..." : ""}`, { hold: false });
         const ball = await throwThing(useMaster ? "master" : "");
         if (!glitch) {
@@ -569,6 +618,107 @@
     await backToWorld();
   }
 
+  function setHp(frac) { $(".hpbar b").style.width = Math.max(0, Math.round(frac * 100)) + "%"; }
+  function playerShake() { const p = $("#scr-battle .player"); p.classList.remove("shake"); void p.offsetWidth; p.classList.add("shake"); }
+  const SAFARI_HTML = '<i class="ball-ico"></i>SAFARI BALL ×<span id="ball-count">30</span>';
+
+  async function duel() {
+    show("battle");
+    Music.play("battle");
+    const scr = $("#scr-battle"); scr.classList.add("duel");
+    $("#ename").textContent = "RIVALE"; $("#elvl").textContent = "L" + rnd(8, 12);
+    buildEnemySprite(Pix.toDataURL(Pix.RIVAL_FRONT, 4), false);
+    spriteWrap.classList.add("pixel");
+    setHp(1);
+    const sbox = $(".safari-box"); sbox.innerHTML = 'TU <span id="hearts">♥♥♥</span>';
+    const btns = $$("#bmenu button"), orig = btns.map((b) => [b.dataset.act, b.textContent]);
+    [["throw", "LANCIA"], ["taunt", "PROVOCA"], ["big", "PALLONE"], ["fuga", "FUGA"]].forEach(([a, l], i) => { btns[i].dataset.act = a; btns[i].textContent = l; });
+    $("#ball").className = "ball";
+    scr.classList.remove("enter"); void scr.offsetWidth; scr.classList.add("enter");
+    await wait(900);
+    Sfx.cry(); enemyShake();
+    await sayB("RIVALE ti sfida a PALLE DI NEVE!");
+    await sayB("Chi colpisce l'altro 3 volte vince. LANCIA con il tempismo giusto, e SCHIVA quando tocca a lui!");
+    let me = 3, him = 3, taunted = false, won = false, fled = false, round = 0;
+    const hearts = () => { $("#hearts").textContent = "♥".repeat(me) + "♡".repeat(3 - me); };
+    while (me > 0 && him > 0 && round++ < 6) {
+      await sayB(`Cosa fa ${NAME()}?`, { hold: false });
+      const act = await menu();
+      if (act === "fuga") { fled = true; await sayB("RIVALE: Scappi?! Lo sapevo!"); break; }
+      if (act === "taunt") {
+        taunted = true;
+        await sayB(pick([`${NAME()}: "I tuoi capelli sembrano un Pokémon di tipo Fuoco."`, `${NAME()}: "Smell ya later... anzi no, ora."`, `${NAME()}: "Il tuo regalo l'anno scorso era un calzino. Singolo."`]));
+        await sayB("RIVALE è furioso! Il prossimo lancio sarà impreciso.");
+      } else {
+        const big = act === "big";
+        await sayB(big ? "Stai preparando un PALLONE di neve... mira al centro!" : "Mira al centro!", { hold: false });
+        const tt = await timingBar("LANCIA!");
+        await sayB(`${NAME()} ha lanciato ${big ? "un PALLONE" : "una palla di neve"}!`, { hold: false });
+        await throwThing(big ? "snow big" : "snow"); $("#ball").className = "ball";
+        const hit = big ? tt === "perfect" : tt !== "bad";
+        if (hit) { him -= big ? 2 : 1; setHp(him / 3); Sfx.breakout(); enemyShake(); hpShake(); await sayB(big ? "COLPITO IN PIENO! Il PALLONE fa doppio danno!" : pick(["Colpito!", "In faccia! RIVALE sputa neve.", "Centro!"])); }
+        else await sayB(pick(["Mancato! RIVALE ride.", "La palla finisce sull'abete.", big ? "Il PALLONE si sbriciola a mezz'aria." : "Troppo lungo!"]));
+        if (him <= 0) break;
+      }
+      // turno del rivale
+      await sayB("RIVALE lancia! Premi A al momento giusto per SCHIVARE!", { hold: false });
+      const ball = $("#ball"); ball.className = "ball snow back"; Sfx.throwBall();
+      const d = await timingBar("SCHIVA!");
+      ball.className = "ball";
+      const dodged = taunted ? d !== "bad" || Math.random() < 0.5 : d !== "bad";
+      taunted = false;
+      if (dodged) await sayB(pick(["Schivata!", "La palla ti sfiora l'orecchio.", "RIVALE: \"Stai fermo!\""]));
+      else { me--; hearts(); playerShake(); Sfx.breakout(); await sayB(pick(["Preso in pieno!", "Neve nel colletto. Gelida.", "Ti ha beccato."])); }
+    }
+    if (him <= 0) {
+      won = true; G.rivalBeaten = true;
+      Music.play("victory"); spriteWrap.classList.add("beaten");
+      await sayB("RIVALE è sepolto dalla neve!");
+      await sayB("RIVALE: \"Ok, ok, hai vinto. Tieni: 5 SAFARI BALL. E non raccontarlo in giro.\"");
+      balls += 5;
+      award("neve");
+      await sayB(`${NAME()} ha ricevuto 5 SAFARI BALL!`);
+    } else if (!fled && me > 0) {
+      await sayB("Pareggio! RIVALE: \"Ho le mani congelate. Rivincita quando vuoi.\"");
+    } else if (!fled) {
+      await sayB("Sei sepolto dalla neve! RIVALE: \"Ritenta quando vuoi, campione.\"");
+    }
+    // ripristino
+    scr.classList.remove("duel"); spriteWrap.classList.remove("pixel", "beaten");
+    sbox.innerHTML = SAFARI_HTML; setBalls(balls);
+    orig.forEach(([a, l], i) => { btns[i].dataset.act = a; btns[i].textContent = l; });
+    setHp(1);
+    await fadeOut();
+    await backToWorld();
+  }
+
+  // ---------- CARTA ALLENATORE ----------
+  let tcardFrom = "world";
+  function openTCard(from) {
+    tcardFrom = from;
+    if (from === "world") World.lock(true);
+    show("tcard");
+    $("#tcard-name").textContent = NAME();
+    const c = $("#tcard-sprite").getContext("2d"); c.clearRect(0, 0, 16, 16); Pix.draw(c, Pix.PLAYER_DOWN, 0, 0);
+    const bd = $("#tcard-badges"); bd.innerHTML = "";
+    BADGES.forEach((b) => {
+      const el = document.createElement("div"); el.className = "badge" + (G.badges.has(b.id) ? " on" : "");
+      el.innerHTML = `<span>${b.icon}</span><small>${b.name}</small>`; el.title = b.desc; bd.appendChild(el);
+    });
+    const s = G.stats, mins = Math.max(1, Math.round((Date.now() - s.start) / 60000));
+    const gifts = World.gifts;
+    $("#tcard-stats").innerHTML = [["PASSI", s.steps], ["REGALI", `${gifts.found}/${gifts.total}`], ["LANCI", `${s.throws} (${s.perfect} perfetti)`], ["TEMPO", `${mins} min`], ["MEDAGLIE", `${G.badges.size}/${BADGES.length}`]]
+      .map(([k, v]) => `<div class="gift-row"><span class="gift-k">${k}</span><b>${v}</b></div>`).join("");
+    const seen = $("#tcard-seen"); seen.innerHTML = s.seen.length ? "" : "<i>Nessuno, per ora.</i>";
+    s.seen.forEach((m) => { const img = document.createElement("img"); img.src = C.decoySprite(m.id); img.alt = m.name; img.title = m.name; seen.appendChild(img); });
+    $("#tcard-back").onclick = closeTCard;
+  }
+  function closeTCard() {
+    Sfx.blip();
+    if (tcardFrom === "world") { show("world"); World.lock(false); }
+    else dex(false);
+  }
+
   async function reveal() {
     const ball = $("#ball");
     await sayB("Un momento... i dati si stanno ricostruendo!", { hold: false });
@@ -588,7 +738,7 @@
     await sayB(`${target}${G.payload.form ? ` (forma ${G.payload.form})` : ""} è nelle tue mani: dovrai fargli il REGALO!`);
     Sfx.dex();
     await sayB(`I dati di ${target} sono stati registrati nel POKÉDEX.`);
-    writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now(), gifts: World.gifts.found });
+    writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now(), gifts: World.gifts.found, badges: [...G.badges], stats: G.stats, rivalBeaten: G.rivalBeaten });
     G.save = loadSave();
     await fadeOut();
     Music.play("dex");
@@ -628,11 +778,14 @@
     });
     const gifts = G.save && G.save.gifts != null ? G.save.gifts : World.gifts.found;
     $("#dex-count").textContent = `CATTURATI 1/6 · 🎁 ${gifts}/5`;
+    $("#dex-tcard").onclick = () => { Sfx.select(); openTCard("dex"); };
+    if (G.save && G.save.badges) { G.badges = new Set(G.save.badges); if (G.save.stats) G.stats = G.save.stats; }
     $("#dex-reset").onclick = () => {
       Sfx.blip();
       if (!confirm("Vuoi cancellare la partita e ricominciare da capo?")) return;
       localStorage.removeItem(C.saveKey);
       G.save = null; G.payload = null; G.player = null; G.decoysSeen = 0; G.talked = {}; G.masterBall = false; G.gifts = 0;
+      G.badges = new Set(); G.rivalBeaten = false; G.stats = { steps: 0, throws: 0, perfect: 0, seen: [], start: Date.now() };
       balls = C.safariBalls;
       Music.stop();
       title();
@@ -661,6 +814,7 @@
   // ---------- tasto B: indietro dove ha senso ----------
   bBtn.addEventListener("click", () => {
     if (G.scr === "card") { Sfx.blip(); dex(false); }
+    else if (G.scr === "tcard") closeTCard();
     else if (G.scr === "pin") { Sfx.blip(); login(); }
     else if (typing) skipType = true;
   });

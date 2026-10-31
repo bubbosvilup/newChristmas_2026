@@ -262,8 +262,13 @@ window.World = (() => {
     const [sp, opt] = spriteFor(S.facing, S.moving, S.frame);
     actors.push({ y: ppy, draw: () => {
       Pix.draw(cx, sp, ppx, ppy - 2, opt);
-      if (tileAt(S.px, S.py) === "G" && !S.moving) {
-        drawTile("G", S.px * T, S.py * T, anim, S.px, S.py);
+      // nell'erba alta la parte bassa del corpo resta coperta, anche mentre si cammina
+      const inGrass = tileAt(S.px, S.py) === "G" || (S.moving && S.fromTile === "G");
+      if (inGrass) {
+        cx.save(); cx.beginPath(); cx.rect(ppx, ppy + 9, 16, 7); cx.clip();
+        for (const [tx, ty] of [[S.px, S.py], [S.px - 1, S.py], [S.px + 1, S.py], [S.px, S.py - 1], [S.px, S.py + 1]])
+          if (tileAt(tx, ty) === "G") drawTile("G", tx * T, ty * T, anim, tx, ty);
+        cx.restore();
         cx.save(); cx.beginPath(); cx.rect(ppx, ppy - 2, 16, 11); cx.clip(); Pix.draw(cx, sp, ppx, ppy - 2, opt); cx.restore();
       }
     } });
@@ -284,6 +289,7 @@ window.World = (() => {
     const [dx, dy] = DIRS[dir];
     const nx = S.px + dx, ny = S.py + dy;
     if (blocked(nx, ny)) return false;
+    S.fromTile = tileAt(S.px, S.py);
     S.moving = dir; S.mx = -dx * T; S.my = -dy * T; S.px = nx; S.py = ny;
     return true;
   }
@@ -291,7 +297,8 @@ window.World = (() => {
   function arrived() {
     const t = tileAt(S.px, S.py);
     const gi = GIFTS.findIndex((g) => g.x === S.px && g.y === S.py && !found.has(g));
-    if (gi >= 0) { found.add(GIFTS[gi]); hooks.onGift && hooks.onGift(found.size, GIFTS.length); return; }
+    hooks.onStep && hooks.onStep();
+    if (gi >= 0) { found.add(GIFTS[gi]); hooks.onGift && hooks.onGift(found.size, GIFTS.length, GIFTS[gi]); return; }
     if (t === "~") {
       // sul ghiaccio si continua a scivolare finché non si incontra un ostacolo
       const [dx, dy] = DIRS[S.facing];

@@ -4,7 +4,7 @@ window.Pix = (() => {
   const PAL = {
     k: "#202030", r: "#d83838", s: "#f8d0a0", S: "#d8a070", b: "#3058c0", w: "#f8f8f8", W: "#c8c8d8",
     h: "#503820", g: "#687080", G: "#c8c8d0", y: "#f8e048", e: "#f8f8f8", p: "#e06060", t: "#30a080",
-    o: "#f09040", c: "#c82838", v: "#8040a0", n: "#f8b060", R: "#a82020", B: "#203c90", d: "#3a2a28"
+    o: "#f09040", c: "#c82838", v: "#8040a0", n: "#f8b060", R: "#a82020", B: "#203c90", d: "#3a2a28", V: "#602880"
   };
 
   // ---- giocatore (16x16, 4 direzioni): testa tonda, visiera, giacca con ombre ----
@@ -119,7 +119,49 @@ window.Pix = (() => {
     "....kgg..ggk....",
     "....kk....kk...."
   ];
-  // ---- allenatore di spalle (battaglia, 24x25) ----
+  const RIVAL_FRONT = [
+    "....k...kk...k...k...kk...k.....",
+    ".kok..kook..kok.kok..kook..kok..",
+    "..kookkooookkookkookkooookkook..",
+    "....kooooooooooooooooooooook....",
+    "....kooooooooooooooooooooook....",
+    "....kooooooooooooooooooooook....",
+    ".....kooooooooooooooooooook.....",
+    ".....koossssssssssssssssook.....",
+    ".....kossssssssssssssssssok.....",
+    ".....kssssssssssssssssssssk.....",
+    ".....ksskkkksssssssskkkkssk.....",
+    ".....ksskwwksssssssskwwkssk.....",
+    ".....ksskweksssssssskwekssk.....",
+    ".....ksskkkksssssssskkkkssk.....",
+    ".....ksssssssssSSsssssssssk.....",
+    ".....ksspssssssSSsssssspssk.....",
+    ".....kssssssskkkkkksssssssk.....",
+    ".....kssssssksssssskssssssk.....",
+    ".......kSSSSSSSSSSSSSSSSk.......",
+    "........kkSSSSSSSSSSSSkk........",
+    "...........kssssssssk...........",
+    "........kkkksssssssskkkk........",
+    "....kkkvvvvkttttttttkvvvvkkk....",
+    "....kvvvvvvkttttttttkvvvvvvk....",
+    "...kvvvvvvvkttttttttkvvvvvvvk...",
+    "...kVvvvvvvkttttttttkvvvvvvVk...",
+    "...kVkvvvvvkttttttttkvvvvvkVk...",
+    "...kVkvvvvvkttttttttkvvvvvkVk...",
+    "...kVkvvvvvkttttttttkvvvvvkVk...",
+    "...kskvvvvvkttttttttkvvvvvksk...",
+    "...ksk.vvvvvkttttttkvvvvv.ksk...",
+    "..kkk.kvvvvvkkkkkkkkvvvvvk.kkk..",
+    "........kggggggggggggggk........",
+    "........kggggggggggggggk........",
+    "........kggggggkkggggggk........",
+    ".......kggggggk.kggggggk........",
+    ".......kggggggk.kggggggk........",
+    ".......kggggggk.kggggggk........",
+    ".......kddddddk.kddddddk........",
+    ".......kkkkkkkk.kkkkkkkk........"
+  ];
+  // ---- allenatore di spalle (battaglia) ----
   const TRAINER_BACK = [
     "............kkkkkkkk............",
     "..........kkrrrrrrrrkk..........",
@@ -262,5 +304,14 @@ window.Pix = (() => {
     R(SKIN2, 13, 25, 3, 2); R(SKIN2, 32, 25, 3, 2);
   }
 
-  return { PAL, PLAYER_DOWN, PLAYER_UP, PLAYER_SIDE, OAK, SANTA, RIVAL, TRAINER_BACK, draw, oakPortrait, rivalPortrait };
+  function toDataURL(sp, scale = 4) {
+    const c = document.createElement("canvas"); c.width = sp[0].length * scale; c.height = sp.length * scale;
+    const x = c.getContext("2d"); x.imageSmoothingEnabled = false;
+    const tmp = document.createElement("canvas"); tmp.width = sp[0].length; tmp.height = sp.length;
+    draw(tmp.getContext("2d"), sp, 0, 0);
+    x.drawImage(tmp, 0, 0, c.width, c.height);
+    return c.toDataURL();
+  }
+
+  return { PAL, RIVAL_FRONT, toDataURL, PLAYER_DOWN, PLAYER_UP, PLAYER_SIDE, OAK, SANTA, RIVAL, TRAINER_BACK, draw, oakPortrait, rivalPortrait };
 })();

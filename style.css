@@ -533,3 +533,42 @@ body {
 #scr-card.on .card-sprite img { animation: pop .5s .15s both; }
 #flash.once { animation: flash .4s steps(2) 1; }
 .gift-hud.pop { animation: pop .5s; }
+
+/* ---------- DUELLO, CARTA ALLENATORE, TOAST ---------- */
+.sprite-wrap.pixel img { image-rendering: pixelated; }
+.sprite-wrap.beaten img { filter: brightness(1.6) saturate(.3); transform: translate(var(--jx,0px), var(--pad,0%)) scale(var(--s,1)) rotate(12deg); }
+#scr-battle .player.shake { animation: shake .4s; }
+.ball.snow { background: radial-gradient(circle at 40% 35%, #fff, #c8d8f0); border-color: #8090b0; }
+.ball.snow::after { display: none; }
+.ball.snow.big { width: 2.6em; height: 2.6em; }
+.ball.back { display: block; animation: fly .8s cubic-bezier(.3,.9,.6,1) reverse forwards; }
+#scr-battle.duel .field { background-image: radial-gradient(ellipse 30% 8% at 15% 40%, rgba(255,255,255,.7), transparent 70%), radial-gradient(ellipse 25% 7% at 70% 20%, rgba(255,255,255,.6), transparent 70%); }
+#scr-battle.duel .battle-snow { opacity: .9; }
+#toast {
+  position: absolute; left: 50%; top: 1em; transform: translate(-50%, -3em); z-index: 60;
+  background: #303040; color: #ffd84d; border: .2em solid #ffd84d; border-radius: .5em;
+  padding: .6em .9em; font-size: .62em; white-space: nowrap; opacity: 0; transition: transform .35s, opacity .35s; pointer-events: none;
+}
+#toast.on { transform: translate(-50%, 0); opacity: 1; }
+#scr-tcard { background: linear-gradient(160deg, #2a3f8f, #1b2a6a); padding: .7em; }
+.tcard {
+  flex: 1; display: flex; flex-direction: column; gap: .55em; font-size: .72em; line-height: 1.5; overflow: auto;
+  background: #f8f8f0; border: .3em solid #202030; border-radius: .6em; padding: .7em;
+  box-shadow: inset 0 0 0 .2em #fff, inset 0 0 0 .4em #6878a8;
+}
+.tcard-head { text-align: center; font-size: .9em; letter-spacing: .05em; color: #2a3f8f; }
+.tcard-top { display: flex; gap: .8em; align-items: center; }
+#tcard-sprite { width: 4em; height: 4em; image-rendering: pixelated; background: #d8f0c8; border: .2em solid #202030; border-radius: .3em; }
+.tcard-name { font-size: 1.2em; }
+.tcard-sub { font-size: .65em; color: #6a6a7a; margin-top: .3em; }
+.tcard-badges { display: flex; justify-content: space-between; gap: .3em; }
+.badge { flex: 1; text-align: center; background: #e8e8e0; border: .15em solid #202030; border-radius: .4em; padding: .35em .1em; opacity: .35; filter: grayscale(1); }
+.badge.on { opacity: 1; filter: none; background: #ffd84d; animation: pop .5s; }
+.badge span { display: block; font-size: 1.3em; }
+.badge small { display: block; font-size: .55em; margin-top: .25em; }
+.tcard-stats { background: #fff; border: .2em solid #202030; border-radius: .4em; padding: .4em .6em; display: grid; gap: .3em; }
+.tcard-label { font-size: .65em; color: #6a6a7a; }
+.tcard-seen { display: flex; gap: .3em; min-height: 3em; flex-wrap: wrap; align-items: center; }
+.tcard-seen img { width: 3em; height: 3em; image-rendering: pixelated; background: #e8f0e0; border-radius: .3em; }
+.tcard-seen i { font-size: .8em; color: #6a6a7a; }
+.dex-foot span { flex: 1; }

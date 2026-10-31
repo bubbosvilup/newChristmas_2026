@@ -7,7 +7,8 @@ Pokémon dai dati corrotti: lo catturi con le Safari Ball (lancio a tempo) e nel
 regalo. L'esito sembra casuale ma è deciso in anticipo.
 
 Extra: sul lago ghiacciato si scivola (puzzle del ghiaccio), in giro ci sono 5 regali nascosti e, trovati tutti,
-Babbo Natale regala una Master Ball che cattura al primo colpo. Tieni premuto B per correre.
+Babbo Natale regala una Master Ball che cattura al primo colpo. Il rivale ti sfida a palle di neve (lancia e schiva a tempo).
+Cinque medaglie da collezionare e una carta allenatore (START nel mondo) con statistiche e Pokémon visti. Tieni premuto B per correre.
 
 - Solo HTML/CSS/JS, nessuna dipendenza, nessun backend: gira su **GitHub Pages**.
 - Pensato per il telefono (d-pad e tasti A/B su schermo), funziona anche da PC (frecce/WASD, Invio).
