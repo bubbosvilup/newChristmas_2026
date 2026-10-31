@@ -1,7 +1,7 @@
 // Configurazione pubblica (nessun segreto qui: questo file è leggibile da chiunque).
 window.CONFIG = {
   // Nomi mostrati nella schermata "Chi sei?". Devono corrispondere a tools/pairings.json
-  names: ["Nicco", "Giulia", "Marco", "Sara", "Luca", "Elena"],
+  names: ["Bubbo", "Lollo", "Naccio", "Albe", "Piebel", "Vale"],
 
   // Avatar mostrati nel Pokédex (in silhouette finché non catturati). L'ordine qui
   // non c'entra con gli accoppiamenti: è solo la numerazione del Pokédex.

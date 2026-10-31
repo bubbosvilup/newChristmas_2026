@@ -1,27 +1,57 @@
 {
   "_commento": "Copia questo file in tools/pairings.json (ignorato da git), compila e lancia: node tools/build-secrets.mjs. 'sprite' è il file dell'avatar in assets/sprites; in alternativa 'pokemon' (numero del Pokédex nazionale) usa uno sprite PokéAPI. 'form' è l'etichetta mostrata al reveal. 'pins' è opzionale: se manca viene generato un PIN a 6 cifre.",
   "people": {
-    "Nicco":  { "sprite": "1.png", "form": "Scout",   "type": "Elettro / Caffè",     "flavor": "Emette scariche se gli parli prima del caffè. Debolezza: i regali banali." },
-    "Giulia": { "sprite": "2.png", "form": "Bunny",     "type": "Normale / Coccole",   "flavor": "Si evolve in base all'umore. Non si sa mai in cosa." },
-    "Marco":  { "sprite": "3.png", "form": "Paglietta",   "type": "Normale / Divano",    "flavor": "Blocca il passaggio dopo pranzo. Si sveglia solo col panettone." },
-    "Sara":   { "sprite": "4.png", "form": "Occhialuta", "type": "Folletto / Karaoke", "flavor": "Canta finché tutti non si addormentano. Poi si offende." },
-    "Luca":   { "sprite": "5.png", "form": "Polo", "type": "Fuoco / Fedeltà",     "flavor": "Insegue qualsiasi cosa gli lanci. Soprattutto le polemiche." },
-    "Elena":  { "sprite": "6.png", "form": "Riccio",   "type": "Acqua / Confusione",  "flavor": "Mal di testa costante. Ogni tanto fa cose incredibili senza accorgersene." }
+    "Bubbo": {
+      "sprite": "4.png",
+      "form": "Duck Face",
+      "type": "Elettro / Selfie",
+      "flavor": "Occhiali d'oro e duck face di serie. Invece di comprare i regali costruisce giochi di Natale. Debolezza: i PIN a 6 cifre."
+    },
+    "Lollo": {
+      "sprite": "2.png",
+      "form": "Bunny",
+      "type": "Normale / Charme",
+      "flavor": "Papillon sempre a posto, orecchie sempre in ascolto. Avvistato più spesso dopo mezzanotte."
+    },
+    "Naccio": {
+      "sprite": "3.png",
+      "form": "Gesù Cristo",
+      "type": "Erba / Zen",
+      "flavor": "Capelli lunghi e paglietta: cammina lento, ma arriva sempre. Si dice abbia trasformato l'acqua in spritz."
+    },
+    "Albe": {
+      "sprite": "1.png",
+      "form": "Esploratore",
+      "type": "Terra / Scout",
+      "flavor": "Orologio da taschino, foulard e distintivo Mtn Scout. Sa sempre dove si va. Non sempre perché."
+    },
+    "Piebel": {
+      "sprite": "5.png",
+      "form": "Polo Aziendale",
+      "type": "Acciaio / Ufficio",
+      "flavor": "Polo blu d'ordinanza e saluto professionale. Alle 18:30 precise si evolve in forma Aperitivo."
+    },
+    "Vale": {
+      "sprite": "6.png",
+      "form": "Riccio",
+      "type": "Fuoco / Chioma",
+      "flavor": "Ricci inarrestabili e maglia rossa: lo spirito natalizio del gruppo. La coda da Eevee non è confermata."
+    }
   },
   "pairings": {
-    "Nicco": "Giulia",
-    "Giulia": "Marco",
-    "Marco": "Sara",
-    "Sara": "Luca",
-    "Luca": "Elena",
-    "Elena": "Nicco"
+    "Bubbo": "Lollo",
+    "Lollo": "Naccio",
+    "Naccio": "Albe",
+    "Albe": "Piebel",
+    "Piebel": "Vale",
+    "Vale": "Bubbo"
   },
   "pins": {
-    "Nicco": "111111",
-    "Giulia": "222222",
-    "Marco": "333333",
-    "Sara": "444444",
-    "Luca": "555555",
-    "Elena": "666666"
+    "Bubbo": "000000",
+    "Lollo": "000000",
+    "Naccio": "000000",
+    "Albe": "000000",
+    "Piebel": "000000",
+    "Vale": "000000"
   }
 }

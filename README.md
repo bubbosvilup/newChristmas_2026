@@ -36,7 +36,7 @@ e stampa i PIN da mandare in privato a ciascuno.
 4. In `js/config.js` aggiorna `names` (deve coincidere con i nomi in `people`), data e budget.
 5. Committa `js/secrets.js` e `js/config.js` e pubblica.
 
-> Il file `js/secrets.js` attualmente nel repo è generato dall'esempio (PIN `111111`…`666666`): va rigenerato con i dati veri.
+> `js/secrets.js` è generato dal `tools/pairings.json` reale (non nel repo). I PIN non vanno mai committati.
 
 ## Musica
 
