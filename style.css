@@ -597,3 +597,8 @@ body {
 .scene-glitch #story-noise { opacity: .9; }
 .scene-glitch .story-dex { border-color: #888; animation: shake .3s infinite; }
 .story-box { height: 32%; font-size: .78em; background: #f8f8f0; }
+
+/* ---------- orientamento ---------- */
+#rotate { display: none; position: fixed; inset: 0; z-index: 1000; background: #2b0a10; color: #f4c6cc; font-size: 12px; line-height: 2; text-align: center; place-items: center; }
+#rotate small { font-size: 9px; color: #e7a0aa; }
+@media (orientation: landscape) and (max-height: 520px) { #rotate { display: grid; } }

@@ -22,7 +22,7 @@ window.CONFIG = {
     { id: 225, name: "Delibird" }, { id: 220, name: "Swinub" }, { id: 361, name: "Snorunt" },
     { id: 613, name: "Cubchoo" }, { id: 234, name: "Stantler" }, { id: 582, name: "Vanillite" }
   ],
-  decoySprite: (id) => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/" + id + ".png",
+  decoySprite: (id) => "assets/pokemon/" + id + ".png", // sprite PokéAPI salvati in locale
 
   // Musica: lascia vuoto per i brani chiptune integrati, oppure indica un file per scena,
   // es. { title: "assets/music/title.mp3", world: "...", battle: "...", victory: "...", dex: "..." }

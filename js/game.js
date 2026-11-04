@@ -366,6 +366,7 @@
       `Ecco, ${NAME()}: prendi queste 30 SAFARI BALL. Qui non si combatte, si cattura e basta.`,
       "Nell'ERBA ALTA troverai Pokémon normali: lasciali andare. Quello che cerchi ha i dati ROTTI, lo riconoscerai subito.",
       "Quando lo catturi, il suo pezzo di Pokédex torna al suo posto. E tu saprai a chi fare il regalo.",
+      "Ti muovi con la croce, con A parli con la gente e leggi i cartelli, tieni premuto B per correre, START apre la tua CARTA.",
       "Vai! E ricorda la regola di sempre: il regalo NON si ricicla."
     ]),
     santa: () => {
