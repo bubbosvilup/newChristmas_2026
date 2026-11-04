@@ -2,7 +2,7 @@
 // viene usato quello (mp3/ogg in loop) al posto del sequencer.
 window.Music = (() => {
   let ctx = null, master = null, muted = false;
-  const VOLUME = 0.42; // volume della musica (gli effetti sonori sono a parte)
+  const VOLUME = 0.36; // volume della musica (gli effetti sonori sono a parte)
   let cur = null;        // traccia chiptune in esecuzione
   let timer = 0;
   let audioEl = null;    // <audio> per i file esterni
@@ -25,13 +25,73 @@ window.Music = (() => {
 
   // ---------- tracce ----------
   // Jingle Bells (pubblico dominio) per il titolo; il resto è originale.
+
+  // ---- helper: accompagnamento a battute (16 sedicesimi = una battuta 4/4) ----
+  const TRIAD = { C: ["C3", "E3", "G3"], G: ["G2", "B2", "D3"], F: ["F2", "A2", "C3"], D: ["D3", "F#3", "A3"], A: ["A2", "C3", "E3"], E: ["E3", "G#3", "B3"], Bb: ["Bb2", "D3", "F3"], Am: ["A2", "C3", "E3"], Dm: ["D3", "F3", "A3"], Em: ["E3", "G3", "B3"] };
+  const bassBars = (chords) => chords.map((c) => { const [r, , f] = TRIAD[c]; return `${r}:4 ${f}:4 ${r}:4 ${f}:4`; }).join(" ");
+  const arpBars = (chords) => chords.map((c) => { const [r, t3, f] = TRIAD[c]; const up = (n) => n.replace(/\d/, (d) => String(+d + 1)); return `${up(r)}:2 ${up(t3)}:2 ${up(f)}:2 ${up(t3)}:2 ${up(r)}:2 ${up(t3)}:2 ${up(f)}:2 ${up(t3)}:2`; }).join(" ");
+  const waltzBars = (chords) => chords.map((c) => { const [r, t3, f] = TRIAD[c]; return `${r}:4 ${t3}:4 ${f}:4`; }).join(" ");
+
+  const XMAS = {
+    // Astro del ciel (Silent Night): prologo e intro, 6/8 dolce
+    night: {
+      bpm: 96, loop: true,
+      ch: [
+        { type: "triangle", gain: 0.07, seq: "G4:6 A4:2 G4:4 E4:12 G4:6 A4:2 G4:4 E4:12 D5:8 D5:4 B4:12 C5:8 C5:4 G4:12 A4:8 A4:4 C5:6 B4:2 A4:4 G4:6 A4:2 G4:4 E4:12 A4:8 A4:4 C5:6 B4:2 A4:4 G4:6 A4:2 G4:4 E4:12 D5:8 D5:4 F5:6 D5:2 B4:4 C5:12 E5:12 C5:4 G4:4 E4:4 G4:6 F4:2 D4:4 C4:12 -:12" },
+        { type: "square", gain: 0.018, seq: ["C", "C", "G", "C", "F", "C", "F", "C", "G", "C", "C", "C"].map((c) => { const [r, t3, f] = TRIAD[c]; return `${r.replace(/\d/, "4")}:4 ${t3.replace(/\d/, "4")}:4 ${f.replace(/\d/, "4")}:4 ${t3.replace(/\d/, "4")}:4 ${r.replace(/\d/, "4")}:4 ${f.replace(/\d/, "4")}:4`; }).join(" ") },
+        { type: "triangle", gain: 0.06, seq: ["C", "C", "G", "C", "F", "C", "F", "C", "G", "C", "C", "C"].map((c) => `${TRIAD[c][0]}:24`).join(" ") }
+      ]
+    },
+    // Deck the Halls: overworld, allegro
+    halls: {
+      bpm: 132, loop: true,
+      ch: [
+        { type: "square", gain: 0.05, seq: [
+          "G4:6 F4:2 E4:4 D4:4 C4:4 D4:4 E4:4 C4:4 D4:2 E4:2 F4:2 D4:2 E4:4 D4:4 C4:4 B3:4 C4:8",
+          "G4:6 F4:2 E4:4 D4:4 C4:4 D4:4 E4:4 C4:4 D4:2 E4:2 F4:2 D4:2 E4:4 D4:4 C4:4 B3:4 C4:8",
+          "D4:6 E4:2 F4:4 D4:4 E4:6 F4:2 G4:4 D4:4 E4:2 F4:2 G4:2 A4:2 B4:4 C5:4 B4:4 A4:4 G4:8",
+          "G4:6 F4:2 E4:4 D4:4 C4:4 D4:4 E4:4 C4:4 A4:2 A4:2 A4:2 A4:2 G4:4 F4:4 E4:4 D4:4 C4:8"
+        ].join(" ") },
+        { type: "square", gain: 0.022, seq: arpBars(["C", "C", "G", "C", "C", "C", "G", "C", "G", "G", "D", "G", "C", "F", "G", "C"]) },
+        { type: "triangle", gain: 0.08, seq: bassBars(["C", "C", "G", "C", "C", "C", "G", "C", "G", "G", "D", "G", "C", "F", "G", "C"]) },
+        { type: "noise", gain: 0.035, seq: "k:4 h:2 h:2 s:4 h:4 ".repeat(16) }
+      ]
+    },
+    // We Wish You a Merry Christmas: Pokédex, 3/4 rilassato
+    wish: {
+      bpm: 126, loop: true,
+      ch: [
+        { type: "square", gain: 0.04, seq: "G4:4 C5:4 C5:2 D5:2 C5:2 B4:2 A4:4 A4:4 A4:4 D5:4 D5:2 E5:2 D5:2 C5:2 B4:4 G4:4 G4:4 E5:4 E5:2 F5:2 E5:2 D5:2 C5:4 A4:4 G4:2 G4:2 A4:4 D5:4 B4:4 C5:8 -:4" },
+        { type: "triangle", gain: 0.07, seq: "-:4 " + waltzBars(["C", "F", "D", "G", "C", "Am", "Dm", "G"]) }
+      ]
+    },
+    // Good King Wenceslas: duello, marcetta veloce
+    duel: {
+      bpm: 152, loop: true,
+      ch: [
+        { type: "square", gain: 0.05, seq: [
+          "F4:4 F4:4 F4:4 G4:4 F4:4 F4:4 C4:8",
+          "D4:4 C4:4 D4:4 E4:4 F4:8 F4:8",
+          "F4:4 F4:4 F4:4 G4:4 F4:4 F4:4 C4:8",
+          "D4:4 C4:4 D4:4 E4:4 F4:8 F4:8",
+          "C5:4 Bb4:4 A4:4 G4:4 A4:4 G4:4 F4:8",
+          "D4:4 C4:4 D4:4 E4:4 F4:8 F4:8",
+          "C4:4 C4:4 D4:4 E4:4 F4:4 F4:4 G4:8",
+          "C5:4 Bb4:4 A4:4 G4:4 F4:8 F4:8"
+        ].join(" ") },
+        { type: "triangle", gain: 0.085, seq: bassBars(["F", "F", "Bb", "F", "F", "F", "Bb", "F", "F", "C", "F", "F", "F", "C", "F", "F"]) },
+        { type: "noise", gain: 0.045, seq: "k:2 h:2 s:2 h:2 ".repeat(32) }
+      ]
+    }
+  };
+
   const TRACKS = {
     title: {
       bpm: 150, loop: true,
       ch: [
         { type: "square", gain: 0.06, seq: "E4:4 E4:4 E4:8 E4:4 E4:4 E4:8 E4:4 G4:4 C4:6 D4:2 E4:16 F4:4 F4:4 F4:6 F4:2 F4:4 E4:4 E4:4 E4:2 E4:2 E4:4 D4:4 D4:4 E4:4 D4:8 G4:8 E4:4 E4:4 E4:8 E4:4 E4:4 E4:8 E4:4 G4:4 C4:6 D4:2 E4:16 F4:4 F4:4 F4:6 F4:2 F4:4 E4:4 E4:4 E4:2 E4:2 G4:4 G4:4 F4:4 D4:4 C4:16" },
         { type: "triangle", gain: 0.09, seq: "C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 F2:4 C3:4 F2:4 C3:4 C3:4 G2:4 C3:4 G2:4 G2:4 D3:4 G2:4 D3:4 G2:4 D3:4 G2:4 D3:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 C3:4 G2:4 F2:4 C3:4 F2:4 C3:4 C3:4 G2:4 C3:4 G2:4 G2:4 D3:4 G2:4 D3:4 C3:4 G2:4 C3:8" },
-        { type: "noise", gain: 0.05, seq: "k:4 h:4 k:4 h:4 ".repeat(32) }
+        { type: "noise", gain: 0.05, seq: "k:4 h:4 k:4 h:4 ".repeat(16) }
       ]
     },
     world: {
@@ -40,16 +100,16 @@ window.Music = (() => {
         { type: "square", gain: 0.05, seq: "G4:4 E4:4 C4:4 E4:4 G4:4 A4:4 G4:8 F4:4 D4:4 B3:4 D4:4 F4:4 G4:4 F4:8 E4:4 C4:4 G3:4 C4:4 E4:4 F4:4 E4:8 D4:4 F4:4 B4:4 A4:4 G4:12 -:4 C5:4 B4:4 A4:4 G4:4 A4:4 G4:4 E4:8 F4:4 A4:4 G4:4 F4:4 E4:4 D4:4 C4:8 E4:4 G4:4 C5:4 B4:4 A4:4 F4:4 D4:8 G4:4 B4:4 D5:4 C5:4 C5:12 -:4" },
         { type: "square", gain: 0.025, seq: "C4:2 E4:2 G4:2 E4:2 ".repeat(4) + "B3:2 D4:2 G4:2 D4:2 ".repeat(4) + "C4:2 E4:2 G4:2 E4:2 ".repeat(4) + "B3:2 D4:2 G4:2 D4:2 ".repeat(2) + "C4:2 E4:2 G4:2 E4:2 ".repeat(2) + "A3:2 C4:2 E4:2 C4:2 ".repeat(4) + "F3:2 A3:2 C4:2 A3:2 ".repeat(4) + "C4:2 E4:2 G4:2 E4:2 ".repeat(4) + "G3:2 B3:2 D4:2 B3:2 ".repeat(2) + "C4:2 E4:2 G4:2 E4:2 ".repeat(2) },
         { type: "triangle", gain: 0.08, seq: "C3:4 -:2 C3:2 G2:4 -:4 ".repeat(2) + "G2:4 -:2 G2:2 D3:4 -:4 ".repeat(2) + "C3:4 -:2 C3:2 G2:4 -:4 ".repeat(2) + "G2:4 -:2 G2:2 D3:4 -:4 C3:4 -:2 C3:2 G2:4 -:4 " + "A2:4 -:2 A2:2 E3:4 -:4 ".repeat(2) + "F2:4 -:2 F2:2 C3:4 -:4 ".repeat(2) + "C3:4 -:2 C3:2 G2:4 -:4 ".repeat(2) + "G2:4 -:2 G2:2 D3:4 -:4 C3:4 -:2 C3:2 G2:4 -:4 " },
-        { type: "noise", gain: 0.035, seq: "k:4 h:2 h:2 s:4 h:4 ".repeat(32) }
+        { type: "noise", gain: 0.035, seq: "k:4 h:2 h:2 s:4 h:4 ".repeat(16) }
       ]
     },
     battle: {
       bpm: 168, loop: true,
       ch: [
-        { type: "square", gain: 0.055, seq: "A4:2 A4:2 A4:2 C5:2 B4:2 A4:2 G4:4 A4:2 A4:2 A4:2 E5:2 D5:2 C5:2 B4:4 A4:2 A4:2 A4:2 C5:2 B4:2 A4:2 G4:2 F4:2 E4:4 G4:4 A4:8 -:4 E5:2 E5:2 E5:2 F5:2 E5:2 D5:2 C5:4 D5:2 D5:2 D5:2 E5:2 D5:2 C5:2 B4:4 C5:2 C5:2 C5:2 D5:2 C5:2 B4:2 A4:2 G4:2 A4:4 B4:4 C5:4 B4:4 A4:8 -:4" },
+        { type: "square", gain: 0.055, seq: "A4:2 A4:2 A4:2 C5:2 B4:2 A4:2 G4:4 A4:2 A4:2 A4:2 E5:2 D5:2 C5:2 B4:4 A4:2 A4:2 A4:2 C5:2 B4:2 A4:2 G4:2 F4:2 E4:4 G4:4 A4:8 -:4 E5:2 E5:2 E5:2 F5:2 E5:2 D5:2 C5:4 D5:2 D5:2 D5:2 E5:2 D5:2 C5:2 B4:4 C5:2 C5:2 C5:2 D5:2 C5:2 B4:2 A4:2 G4:2 A4:4 B4:4 C5:4 B4:4 A4:8 -:4 A4:2 A4:2 A4:2 C5:2 B4:2 A4:2 G4:4 A4:2 A4:2 A4:2 E5:2 D5:2 C5:2 B4:4" },
         { type: "square", gain: 0.03, seq: "A3:1 -:1 A3:1 -:1 ".repeat(8) + "F3:1 -:1 F3:1 -:1 ".repeat(4) + "G3:1 -:1 G3:1 -:1 ".repeat(4) + "A3:1 -:1 A3:1 -:1 ".repeat(4) + "E3:1 -:1 E3:1 -:1 ".repeat(4) + "A3:1 -:1 A3:1 -:1 ".repeat(4) + "F3:1 -:1 F3:1 -:1 ".repeat(4) + "G3:1 -:1 G3:1 -:1 ".repeat(4) + "E3:1 -:1 E3:1 -:1 ".repeat(4) + "A3:1 -:1 A3:1 -:1 ".repeat(4) },
-        { type: "triangle", gain: 0.09, seq: "A2:2 A2:2 A3:2 A2:2 ".repeat(8) + "F2:2 F2:2 F3:2 F2:2 ".repeat(4) + "G2:2 G2:2 G3:2 G2:2 ".repeat(4) + "A2:2 A2:2 A3:2 A2:2 ".repeat(4) + "E2:2 E2:2 E3:2 E2:2 ".repeat(4) + "A2:2 A2:2 A3:2 A2:2 ".repeat(4) + "F2:2 F2:2 F3:2 F2:2 ".repeat(4) + "G2:2 G2:2 G3:2 G2:2 ".repeat(4) + "E2:2 E2:2 E3:2 E2:2 ".repeat(4) + "A2:2 A2:2 A3:2 A2:2 ".repeat(4) },
-        { type: "noise", gain: 0.05, seq: "k:2 h:2 s:2 h:2 k:2 k:2 s:2 h:2 ".repeat(24) }
+        { type: "triangle", gain: 0.09, seq: "A2:2 A2:2 A3:2 A2:2 ".repeat(6) + "F2:2 F2:2 F3:2 F2:2 ".repeat(4) + "G2:2 G2:2 G3:2 G2:2 ".repeat(4) + "E2:2 E2:2 E3:2 E2:2 ".repeat(4) + "A2:2 A2:2 A3:2 A2:2 ".repeat(4) },
+        { type: "noise", gain: 0.05, seq: "k:2 h:2 s:2 h:2 k:2 k:2 s:2 h:2 ".repeat(11) }
       ]
     },
     victory: {
@@ -69,6 +129,8 @@ window.Music = (() => {
       ]
     }
   };
+
+  Object.assign(TRACKS, XMAS);
 
   function init() {
     if (ctx) return;
@@ -170,5 +232,5 @@ window.Music = (() => {
     if (audioEl) audioEl.volume = m ? 0 : VOLUME;
   }
 
-  return { init, play, stop, setMuted, get current() { return curName; } };
+  return { init, play, stop, setMuted, get current() { return curName; }, get tracks() { return TRACKS; } };
 })();

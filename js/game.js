@@ -125,10 +125,10 @@
       offA(); $("#scr-title").removeEventListener("click", go);
       if (G.save && G.save.payload) {
         G.player = G.save.player; G.payload = G.save.payload;
-        Music.play("dex");
+        Music.play("wish");
         dex(true);
       } else {
-        Music.play("title");
+        Music.play("night");
         prologue();
       }
     };
@@ -189,10 +189,11 @@
     storyGlitch(false);
     storyScene("town");
     await wait(600);
-    await sayStory("BARBERINO DI MUGELLO. Un paese tra le colline, dove d'inverno la nebbia sale dal lago e le luci di Natale si accendono presto.");
+    await sayStory("BARBERINO DI MUGELLO. Un paese tra le colline, dove d'inverno la nebbia sale dal Bilancino e le luci di Natale si accendono presto.");
     await sayStory("Qui, tanti Natali fa, sei amici fecero un patto: ogni anno un regalo segreto. Uno a testa. Nessuno sa da chi.");
+    await sayStory("Il rito è sempre lo stesso: una cena, un albero, sei pacchetti. Qualche calzino di troppo. Qualche regalo che nessuno ha mai dimenticato.");
     await sayStory("Erano ragazzi, allora. Oggi hanno trentacinque, trentasei anni. Lavoro, case, impegni. Qualcuno abita un po' più lontano.");
-    await sayStory("Ci si vede meno di una volta. Ma ogni dicembre, puntuale, il patto torna a bussare.");
+    await sayStory("Ci si vede meno di una volta. Le chat restano aperte, le serate si diradano. Ma ogni dicembre, puntuale, il patto torna a bussare.");
     storyScene("dex");
     Sfx.dex();
     await sayStory("Per non perderne memoria, il Prof. OAK costruì un POKÉDEX speciale: dentro c'erano tutti e sei, registrati come Pokémon rarissimi.");
@@ -202,6 +203,7 @@
     Sfx.glitch();
     await sayStory("I DATI SI SONO CORROTTI. Sei amici, sei ???????. Il Pokédex non ricorda più chi è chi.");
     await sayStory("C'è un solo modo per ricostruirlo: tornare nell'erba alta. E catturare di nuovo, uno per uno, i propri amici.");
+    await sayStory("Sei Allenatori. Sei Safari Ball a testa, più o meno. E un Natale da salvare. Questa è la loro storia.");
     storyGlitch(false);
     await fadeOut();
     $("#fade").classList.remove("on");
@@ -356,16 +358,20 @@
 
   const NAME = () => G.player.toUpperCase();
   const DIALOGUES = {
-    oak: () => G.talked.oak ? [
-      pick([
+    oak: () => G.talked.oak ? (
+      balls < 10 ? (balls += 10, setBalls(balls), [`Finite le ball? Tieni, altre 10 SAFARI BALL. Ma mira meglio, ${NAME()}: non crescono sugli abeti.`]) :
+      G.glitchFled ? (G.glitchFled = false, ["Ti è scappato, eh? Succede. I dati corrotti sono nervosi.", "È ancora nell'erba alta, da qualche parte. Lancia quando il cursore è al centro: fa la differenza."]) :
+      [pick([
         "Ancora qui? L'erba alta è laggiù, non davanti a me.",
         "Un consiglio: tieni premuto B per correre. Lo faccio anch'io quando vedo la bolletta.",
-        "Se incontri un Pokémon normale, lascialo stare. Tu cerchi quello coi dati CORROTTI."
-      ])
-    ] : (G.talked.oak = true, [
+        "Se incontri un Pokémon normale, lascialo stare. Tu cerchi quello coi dati CORROTTI.",
+        "Se resti senza ball, torna da me. Ne ho una scorta... limitata."
+      ])]
+    ) : (G.talked.oak = true, [
       `Ecco, ${NAME()}: prendi queste 30 SAFARI BALL. Qui non si combatte, si cattura e basta.`,
       "Nell'ERBA ALTA troverai Pokémon normali: lasciali andare. Quello che cerchi ha i dati ROTTI, lo riconoscerai subito.",
       "Quando lo catturi, il suo pezzo di Pokédex torna al suo posto. E tu saprai a chi fare il regalo.",
+      "Attento: un Pokémon coi dati corrotti può FUGGIRE se sbagli troppi lanci. E le ball sono quelle che sono. Se finiscono, torna da me.",
       "Ti muovi con la croce, con A parli con la gente e leggi i cartelli, tieni premuto B per correre, START apre la tua CARTA.",
       "Vai! E ricorda la regola di sempre: il regalo NON si ricicla."
     ]),
@@ -386,7 +392,7 @@
           "HO HO HO! Trentacinque anni e ancora mi credete. Siete i miei preferiti di tutto il Mugello.",
           "Quest'anno niente slitta: i regali ve li consegnate da soli. Io supervisiono dal bosco.",
           `Però ho perso ${g.total} REGALI per la Zona Safari... Se li trovi tutti, ho qualcosa per te.`,
-          "Uno è finito in mezzo al lago. Sul ghiaccio si scivola: pensa bene da dove partire."
+          "Uno è finito in mezzo al Bilancino ghiacciato. Sul ghiaccio si scivola: pensa bene da dove partire."
         ];
       }
       return [`Regali trovati: ${g.found} su ${g.total}. ${g.found ? "Continua così!" : "Guarda negli angoli, dietro le case, nel recinto..."}`];
@@ -401,7 +407,7 @@
         "Visto che l'invito non arriva, mi vendico: ti sfido a PALLE DI NEVE! Cinque cuori a testa. Preparati!"
       ];
     },
-    S: () => ["ZONA SAFARI DEL MUGELLO", "▸ Erba alta a nord e a sud. ▸ Lago ghiacciato: si scivola. ▸ Segnalati DATI CORROTTI nella zona."],
+    S: () => ["ZONA SAFARI DEL MUGELLO", "▸ Erba alta a nord e a sud. ▸ Lago di Bilancino ghiacciato: si scivola. ▸ Segnalati DATI CORROTTI nella zona."],
     "D:4,4": () => ["La porta del laboratorio è chiusa.", "Un biglietto: \"Sono qui fuori. — Prof. OAK\""],
     "D:11,10": () => ["È chiuso a chiave. Sulla porta un foglio: \"CENA DI NATALE DEI SEI — data da definire, come ogni anno\".", "Da dentro arriva un profumo di panettone. Qualcuno ha iniziato in anticipo."],
     W: () => ["È un pupazzo di neve.", "...Ti ha appena fatto l'occhiolino?"],
@@ -427,7 +433,7 @@
 
   async function world() {
     show("world");
-    Music.play("world");
+    Music.play("halls");
     World.reset();
     G.threshold = rnd(C.stepsMin, C.stepsMax);
     G.masterBall = false; G.gifts = 0; updateHud();
@@ -438,7 +444,7 @@
 
   async function backToWorld() {
     show("world");
-    Music.play("world");
+    Music.play("halls");
     World.start();
     await fadeIn();
     World.lock(false);
@@ -629,7 +635,11 @@
           "Il SASSO attraversa ??????? come fosse un bug. Nessun effetto."
         ].slice(Math.min(sasso - 1, 2))));
       } else if (act === "ball") {
-        if (balls <= 0) { await sayB("Non hai più SAFARI BALL! ...Scherzo, OAK te ne passa altre 10."); setBalls(10); continue; }
+        if (balls <= 0 && !(G.masterBall && glitch)) {
+          await sayB("Non hai più SAFARI BALL!");
+          if (glitch) { await flee("??????? ne approfitta e si dilegua nell'erba! Torna da OAK per altre ball."); return; }
+          continue;
+        }
         const useMaster = G.masterBall && glitch;
         if (G.masterBall && !glitch) { await sayB(`Non sprecare la MASTER BALL su un ${name}! Usa una Safari Ball.`); }
         attempts++;
@@ -647,7 +657,7 @@
         spriteWrap.classList.add("hidden-mon"); stopGlitch();
         await wait(350);
         ball.className = "ball land";
-        const chance = useMaster || attempts >= 3 ? 1 : t === "perfect" ? 0.85 : t === "good" ? 0.5 : 0.2;
+        const chance = useMaster ? 1 : t === "perfect" ? 0.75 : t === "good" ? 0.45 : 0.15;
         const succeed = Math.random() < chance;
         const shakes = succeed ? 3 : rnd(1, 2);
         for (let i = 0; i < shakes; i++) {
@@ -658,8 +668,11 @@
         if (!succeed) {
           Sfx.breakout(); ball.className = "ball";
           spriteWrap.classList.remove("hidden-mon"); startGlitch(1.4); Sfx.glitch();
-          await sayB(pick(["Oh no! ??????? è sfuggito!", "Accidenti! C'è mancato poco!", "??????? si rifiuta di entrare. Ha paura del buio."]));
+          await sayB(pick(["Oh no! ??????? è uscito dalla ball!", "Accidenti! C'è mancato poco!", "??????? si rifiuta di entrare. Ha paura del buio."]));
           startGlitch(1);
+          // più lanci sbagli, più il glitch si innervosisce: può fuggire
+          const fleeChance = attempts >= 2 ? 0.12 + 0.1 * (attempts - 2) + (t === "bad" ? 0.12 : 0) : 0;
+          if (Math.random() < fleeChance) { await flee(pick(["??????? trema, sfarfalla... ed è FUGGITO!", "??????? si smaterializza in un lampo di pixel. È FUGGITO!"])); return; }
           continue;
         }
         ball.classList.add("caught");
@@ -681,7 +694,7 @@
 
   async function duel() {
     show("battle");
-    Music.play("battle");
+    Music.play("duel");
     const scr = $("#scr-battle"); scr.classList.add("duel");
     $("#ename").textContent = "RIVALE"; $("#elvl").textContent = "L" + rnd(8, 12);
     buildEnemySprite(Pix.toDataURL(Pix.RIVAL_FRONT, 4), false);
@@ -797,6 +810,19 @@
     else dex(false);
   }
 
+  async function flee(text) {
+    Sfx.breakout(); Sfx.glitch(); stopGlitch();
+    spriteWrap.classList.add("flee");
+    await sayB(text);
+    G.glitchFled = true;
+    // si nasconde di nuovo nell'erba: lo ritrovi dopo pochi passi
+    G.threshold = World.S.stepsInGrass + rnd(3, 6);
+    await sayB("Si nasconde di nuovo nell'erba alta. Non è andato lontano.");
+    spriteWrap.classList.remove("flee");
+    await fadeOut();
+    await backToWorld();
+  }
+
   async function reveal() {
     const ball = $("#ball");
     await sayB("Un momento... i dati si stanno ricostruendo!", { hold: false });
@@ -821,7 +847,7 @@
     writeSave({ player: G.player, payload: G.payload, capturedAt: Date.now(), gifts: World.gifts.found, badges: [...G.badges], stats: G.stats, rivalBeaten: G.rivalBeaten });
     G.save = loadSave();
     await fadeOut();
-    Music.play("dex");
+    Music.play("wish");
     dex(false);
     await fadeIn();
   }

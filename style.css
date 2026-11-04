@@ -602,3 +602,6 @@ body {
 #rotate { display: none; position: fixed; inset: 0; z-index: 1000; background: #2b0a10; color: #f4c6cc; font-size: 12px; line-height: 2; text-align: center; place-items: center; }
 #rotate small { font-size: 9px; color: #e7a0aa; }
 @media (orientation: landscape) and (max-height: 520px) { #rotate { display: grid; } }
+
+.sprite-wrap.flee { animation: fleeOut .7s ease-in both; }
+@keyframes fleeOut { 0% { transform: none; opacity: 1; } 30% { transform: translateX(-.5em); } 100% { transform: translateX(140%) scale(.6); opacity: 0; } }
