@@ -2,6 +2,7 @@
 // viene usato quello (mp3/ogg in loop) al posto del sequencer.
 window.Music = (() => {
   let ctx = null, master = null, muted = false;
+  const VOLUME = 0.42; // volume della musica (gli effetti sonori sono a parte)
   let cur = null;        // traccia chiptune in esecuzione
   let timer = 0;
   let audioEl = null;    // <audio> per i file esterni
@@ -73,7 +74,7 @@ window.Music = (() => {
     if (ctx) return;
     try {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
-      master = ctx.createGain(); master.gain.value = muted ? 0 : 1; master.connect(ctx.destination);
+      master = ctx.createGain(); master.gain.value = muted ? 0 : VOLUME; master.connect(ctx.destination);
     } catch { ctx = null; }
   }
 
@@ -149,7 +150,7 @@ window.Music = (() => {
     if (file) {
       audioEl = new Audio(file);
       audioEl.loop = TRACKS[name] ? TRACKS[name].loop : true;
-      audioEl.volume = muted ? 0 : 0.6;
+      audioEl.volume = muted ? 0 : VOLUME;
       audioEl.play().catch(() => {});
       return;
     }
@@ -165,8 +166,8 @@ window.Music = (() => {
 
   function setMuted(m) {
     muted = m;
-    if (master) master.gain.value = m ? 0 : 1;
-    if (audioEl) audioEl.volume = m ? 0 : 0.6;
+    if (master) master.gain.value = m ? 0 : VOLUME;
+    if (audioEl) audioEl.volume = m ? 0 : VOLUME;
   }
 
   return { init, play, stop, setMuted, get current() { return curName; } };
